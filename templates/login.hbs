@@ -1,0 +1,34 @@
+<section class="login-layout">
+  <div class="surface-card login-card">
+    <p class="eyebrow">Acceso seguro</p>
+    <h1>Ingresá a DonaTrack</h1>
+    <p class="section-description">Usá las credenciales de tu organización para acceder a las herramientas de la red.</p>
+
+    <div class="social-login" aria-label="Opciones de inicio de sesión social">
+      <button class="button button-social" type="button" data-provider="google">Continuar con Google <span aria-hidden="true">→</span></button>
+      <button class="button button-social" type="button" data-provider="microsoft">Continuar con Microsoft <span aria-hidden="true">→</span></button>
+      <button class="button button-social" type="button" data-provider="institucional">Cuenta institucional <span class="tag tag-violet">SSO</span></button>
+    </div>
+    {{#if authError}}<p class="notice notice-error" role="alert">{{authError}}</p>{{/if}}
+
+    <div class="form-divider"><span>O ingresá con tus credenciales</span></div>
+    <form id="login-form" class="form-stack">
+      <label class="field"><span>Correo electrónico, usuario o CUIT/CUIL</span><input name="identifier" type="text" autocomplete="username" placeholder="nombre@organizacion.org" required minlength="3"></label>
+      <label class="field"><span>Contraseña</span><span class="password-control"><input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required minlength="1"><button class="password-toggle" type="button" data-action="toggle-password" aria-label="Mostrar contraseña">Ver</button></span></label>
+      <label class="checkbox-field"><input name="remember" type="checkbox"><span>Recordar mi sesión en este dispositivo</span></label>
+      <p class="notice notice-info">El servicio de autenticación del backend está pendiente de exponer su endpoint. El formulario muestra el flujo esperado y se conecta cuando esté configurado.</p>
+      <p id="login-error" class="notice notice-error" role="alert" hidden></p>
+      <button class="button button-primary button-wide" type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
+    </form>
+    {{#if user}}<button class="button button-outline button-wide" type="button" data-action="logout">Cerrar sesión actual</button>{{/if}}
+  </div>
+  <aside class="login-aside">
+    <span class="eyebrow">DonaTrack · Red solidaria</span>
+    <h2>Una plataforma para coordinar, acompañar y transparentar cada entrega.</h2>
+    <ul class="feature-list">
+      <li><span class="icon-tile" aria-hidden="true">✓</span><span><strong>Acceso por perfil</strong><small>Donantes, entidades y administración.</small></span></li>
+      <li><span class="icon-tile icon-green" aria-hidden="true">↗</span><span><strong>Información conectada</strong><small>Datos consumidos desde las APIs existentes.</small></span></li>
+      <li><span class="icon-tile icon-violet" aria-hidden="true">⌁</span><span><strong>Inicio federado</strong><small>Listo para integrar proveedores SSO.</small></span></li>
+    </ul>
+  </aside>
+</section>

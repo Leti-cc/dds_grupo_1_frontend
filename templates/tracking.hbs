@@ -1,0 +1,42 @@
+<section class="page-heading">
+  <div><p class="eyebrow">Seguimiento público</p><h1>¿Dónde está tu entrega?</h1><p class="lead">Ingresá el identificador de logística para consultar su estado y recorrido.</p></div>
+</section>
+<section class="surface-card tracking-search">
+  <form id="tracking-form" class="inline-form">
+    <label class="field grow"><span>Identificador de entrega</span><input name="deliveryId" value="{{queryId}}" placeholder="Ej.: 6727a1f0c2b1e45a9d3f0a11" required autocomplete="off"></label>
+    <button class="button button-primary" type="submit">Consultar entrega</button>
+  </form>
+  <p class="field-hint">Podés copiar el identificador que figura en el comprobante de la donación.</p>
+</section>
+{{#if error}}
+  <p class="notice notice-error">{{error}}</p>
+{{else if delivery}}
+  <section class="surface-card tracking-result">
+    <div class="section-heading">
+      <div><p class="eyebrow">Entrega #{{delivery.id}}</p><h2>{{delivery.displayName}}</h2><p>{{delivery.displayDescription}}</p></div>
+      <span class="tag tag-blue">{{statusLabel delivery.estado}}</span>
+    </div>
+    <dl class="detail-grid">
+      <div><dt>Donación vinculada</dt><dd>{{delivery.donacionId}}</dd></div>
+      <div><dt>Destino</dt><dd>{{delivery.direccionDestino}}</dd></div>
+      <div><dt>Estado</dt><dd>{{statusLabel delivery.estado}}</dd></div>
+      <div><dt>Última actualización</dt><dd>{{delivery.updatedAt}}</dd></div>
+    </dl>
+    <div class="timeline">
+      <h3>Historial de seguimiento</h3>
+      {{#if delivery.historial.length}}
+        <ol class="timeline-list">
+          {{#each delivery.historial}}
+            <li><span class="timeline-dot"></span><div><strong>{{statusLabel estado}}</strong><time>{{fecha}}</time>{{#if motivo}}<p>{{motivo}}</p>{{/if}}</div></li>
+          {{/each}}
+        </ol>
+      {{else}}
+        <p class="muted">El servicio todavía no publicó eventos de seguimiento para esta entrega.</p>
+      {{/if}}
+    </div>
+  </section>
+{{else if queryId}}
+  <section class="surface-card empty-state"><strong>No se encontró la entrega.</strong><span>Revisá el identificador o intentá nuevamente.</span></section>
+{{else}}
+  <section class="surface-card empty-state"><strong>El seguimiento aparecerá acá.</strong><span>La consulta se realiza en el servicio de logística.</span></section>
+{{/if}}

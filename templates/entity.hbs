@@ -1,0 +1,50 @@
+<section class="page-heading dashboard-heading">
+  <div><p class="eyebrow">Espacio de entidad beneficiaria</p><h1>Actividad de la organización</h1><p class="lead">Consultá las necesidades y el seguimiento de tus entregas.</p></div>
+  <span class="tag tag-green">Datos desde los servicios</span>
+</section>
+{{#if requiresAuth}}<p class="notice notice-info">{{authMessage}} <a href="#/login">Ingresar</a></p>{{/if}}
+{{#unless requiresAuth}}
+<section class="surface-card entity-filter">
+  <form id="entity-filter-form" class="inline-form">
+    <label class="field grow"><span>Identificador de entidad</span><input name="entityId" type="number" min="1" value="{{entityId}}" placeholder="ID asignado por DonaTrack"></label>
+    <button class="button button-outline" type="submit">Consultar</button>
+  </form>
+  <p class="field-hint">El ID se obtiene del perfil de la organización. Esta pantalla no inventa datos si la entidad no está configurada.</p>
+</section>
+{{#if entityId}}
+  <section class="metric-grid">
+    <article class="metric-card"><span>Necesidades activas</span><strong>{{needs.length}}</strong><small>Recurso de necesidades</small></article>
+    <article class="metric-card metric-blue"><span>Entregas vinculadas</span><strong>—</strong><small>La API aún no informa entidadId</small></article>
+    <article class="metric-card metric-green"><span>Organización</span><strong class="metric-word">{{entityName}}</strong><small>{{entityAddress}}</small></article>
+  </section>
+  {{#if errors.needs}}<p class="notice notice-error">{{errors.needs}}</p>{{/if}}
+  {{#if errors.entities}}<p class="notice notice-error">{{errors.entities}}</p>{{/if}}
+  {{#if errors.subcategories}}<p class="notice notice-error">{{errors.subcategories}}</p>{{/if}}
+  <section class="dashboard-grid">
+    <div class="surface-card">
+      <div class="section-heading"><div><p class="eyebrow">Abastecimiento</p><h2>Necesidades comunitarias</h2></div><button class="button button-primary button-small" type="button" data-action="toggle-need-form">Nueva necesidad</button></div>
+      <form id="need-form" class="form-stack form-panel" hidden>
+        <label class="field"><span>Subcategoría</span><select name="subcategoriaId" required><option value="">Seleccioná una subcategoría</option>{{#each subcategories}}<option value="{{id}}">{{nombre}}</option>{{/each}}</select></label>
+        <label class="field"><span>Descripción</span><input name="descripcion" required maxlength="250" placeholder="Qué necesita la organización"></label>
+        <label class="field"><span>Cantidad</span><input name="cantidad" type="number" min="1" required></label>
+        <label class="field"><span>Tipo</span><select name="tipo"><option value="RECURRENTE">Recurrente</option><option value="EXTRAORDINARIA">Extraordinaria</option></select></label>
+        <div class="recurring-fields"><label class="field"><span>Frecuencia</span><input name="frecuencia" type="number" min="1" value="1"></label><label class="field"><span>Período</span><select name="tipoPeriodo"><option value="SEMANA">Semanal</option><option value="MES">Mensual</option><option value="ANIO">Anual</option></select></label></div>
+        <label class="field extraordinary-field" hidden><span>Motivo</span><input name="motivo" maxlength="250"></label>
+        <p id="need-error" class="notice notice-error" role="alert" hidden></p>
+        <button class="button button-primary" type="submit">Guardar necesidad</button>
+      </form>
+      {{#if needs.length}}
+        <div class="table-wrap"><table><thead><tr><th>Necesidad</th><th>Cantidad</th><th>Frecuencia</th><th>Estado</th></tr></thead><tbody>{{#each needs}}<tr><td><strong>{{subcategoriaNombre}}</strong><small>{{descripcion}}</small></td><td>{{cantidad}}</td><td>{{#if frecuencia}}{{frecuencia}} · {{tipoPeriodo}}{{else}}Extraordinaria{{/if}}</td><td><span class="tag {{#if activa}}tag-green{{else}}tag-neutral{{/if}}">{{#if activa}}Activa{{else}}Inactiva{{/if}}</span></td></tr>{{/each}}</tbody></table></div>
+      {{else if errors.needs}}<div class="empty-state compact">No se pudieron cargar las necesidades.</div>
+      {{else}}<div class="empty-state compact">No hay necesidades registradas para esta entidad.</div>{{/if}}
+    </div>
+    <div class="surface-card">
+      <div class="section-heading"><div><p class="eyebrow">Logística</p><h2>Entregas en curso</h2></div></div>
+      <div class="empty-state compact"><strong>Falta vincular entregas con la entidad.</strong><span>El endpoint de logística no devuelve entidadId. Se necesita ese dato o un endpoint de consulta por entidad.</span></div>
+    </div>
+  </section>
+{{else}}
+  {{#if errors.needs}}<p class="notice notice-error">{{errors.needs}}</p>{{/if}}
+  <section class="surface-card empty-state"><strong>Seleccioná una entidad para ver su actividad.</strong><span>Ingresá el ID que devuelve el servicio de donaciones.</span></section>
+{{/if}}
+{{/unless}}
