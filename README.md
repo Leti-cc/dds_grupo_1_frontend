@@ -1,6 +1,18 @@
 # dds_grupo_1_frontend
 
-## Frontend — alcance de la entrega 6
+## Integrantes:
+- Aguero Silva Daniel - 209.526-9
+- Duran Agustina Denise - 222.281-4
+- Elías Thiago - 222.286-3
+- Letizia Joaquín - 222.458-6
+- Sarba Máximo - 216.120-6
+- Schoeffler Facundo Ezequiel - 222.696-0
+- Tilve Franco Enrique - 222.741-1
+- Tisman Facundo Martín - 214.184-0
+
+
+
+# Frontend
 
 Cliente web independiente del backend, construido con HTML, CSS, JavaScript,
 Vite y Handlebars. Las vistas se renderizan desde templates y consumen las APIs
@@ -8,7 +20,7 @@ REST existentes. El diseño usa los tokens del prototipo **Civic Solidary
 Modernism**: azul primario, superficies claras, verde para estados positivos,
 violeta para incentivos, Plus Jakarta Sans/Inter y layouts responsive.
 
-Incluye las seis vistas del prototipo:
+Incluye las seis vistas diagramadas en la entrega 1:
 
 - Portal público con indicadores y entregas recientes.
 - Seguimiento público de una entrega.
@@ -21,10 +33,24 @@ El cliente HTTP está separado de las vistas; `js/app.js` coordina rutas,
 controladores y eventos; `templates/*.hbs` renderiza datos de las APIs.
 No se incorporaron funcionalidades de la entrega 7.
 
-### Cómo levantar el sitio
+### Requisitos
 
-Requisitos: Node.js 20 o superior y los servicios Java disponibles si se quiere
-ver información real.
+- Node.js 20 o superior y npm (npm se instala junto con Node.js).
+- El backend Java sólo es necesario para consultar o modificar datos reales. El
+  frontend puede iniciarse sin los servicios; mostrará avisos de conexión.
+- PowerShell, una terminal de VS Code o una terminal compatible.
+
+Para comprobar que Node.js y npm estén disponibles:
+
+```powershell
+node --version
+npm --version
+```
+
+### Cómo levantar el sitio en desarrollo
+
+Desde una terminal, ubicarse en la carpeta raíz del proyecto (donde está
+`package.json`) y ejecutá:
 
 ```powershell
 npm install
@@ -32,39 +58,68 @@ Copy-Item .env.example .env.local
 npm run dev
 ```
 
-Abrí la URL que informa Vite, normalmente `http://localhost:5173`. No abras
-`index.html` con `file://`: la aplicación usa módulos y templates compilados por
-Vite. Para comprobar el bundle de producción:
+`npm install` descarga las dependencias del proyecto; normalmente se ejecuta la
+primera vez o después de modificar `package.json`/`package-lock.json`. El comando
+`Copy-Item` crea la configuración local editable; si `.env.local` ya existe,
+conservar el archivo y editar sus valores en lugar de volver a copiarlo.
+
+Vite muestra en la terminal la dirección local, normalmente
+`http://localhost:5173`. Abrir en el navegador y dejar esa terminal abierta
+mientras se usa el sitio. Para detener el servidor, inputar `Ctrl+C` en la terminal.
+
+Vite es el servidor de desarrollo y compilador del frontend: sirve HTML, módulos
+JavaScript y plantillas Handlebars, y recarga la aplicación cuando se guardan
+cambios. Por eso, **no abrir `index.html` con `file://`**.
+
+### Variables de entorno
+
+Copiar `.env.example` a `.env.local`. Vite carga las variables `VITE_*` al
+iniciar el servidor. `.env.local` es local a la máquina y no debe subirse al
+repositorio. Si se cambia una URL, detener y reiniciar `npm run dev`.
+
+| Variable | Para qué se usa | Valor inicial |
+|---|---|---|
+| `VITE_API_DONACIONES` | URL base de categorías, donantes, entidades, necesidades y donaciones. | `http://localhost:8080` |
+| `VITE_API_NOTIFICACIONES` | URL base del historial de notificaciones mostrado en administración. | `http://localhost:8081` |
+| `VITE_API_INCENTIVOS` | URL base del perfil, las misiones, las insignias y el ranking de donantes. | `http://localhost:8082` |
+| `VITE_API_LOGISTICA` | URL base de camiones y entregas; incluye el seguimiento público. | `http://localhost:8083` |
+| `VITE_API_AUTH` | URL base reservada para el servicio de autenticación y su futuro endpoint de login/callback. | `http://localhost:8084` |
+| `VITE_AUTH_GOOGLE_URL` | URL de autorización provista por el backend para iniciar el flujo OAuth/OIDC con Google. Vacía hasta que se configure. | Vacío |
+| `VITE_AUTH_MICROSOFT_URL` | URL de autorización provista por el backend para iniciar el flujo OAuth/OIDC con Microsoft. Vacía hasta que se configure. | Vacío |
+| `VITE_AUTH_INSTITUCIONAL_URL` | URL de autorización provista por el backend para iniciar el flujo SSO institucional. Vacía hasta que se configure. | Vacío |
+
+Los valores de ejemplo asumen que los servicios Java corren localmente en esos
+puertos. Si el backend está en otra dirección, reemplazar la URL correspondiente
+en `.env.local`. No credenciales a estas variables: las
+variables `VITE_*` quedan accesibles desde el navegador. Las URLs de inicio SSO
+deben ser endpoints públicos de autorización, nunca contener un secreto de
+cliente.
+
+### Conectar con el backend Java
+
+1. Iniciar los servicios Java requeridos desde su propio proyecto y confirmar sus puertos. El frontend no inicia ni compila el backend.
+2. Ajustar en `.env.local` las URLs base indicadas arriba. Por ejemplo, las APIs documentadas usan `8080` para donaciones, `8081` para notificaciones, `8082` para incentivos y `8083` para logística.
+3. Configurar CORS en los servicios para permitir el origen del frontend (`http://localhost:5173`). Si se activa autenticación, el backend también debe permitir el encabezado `Authorization`.
+4. Reiniciar Vite y probar las vistas con datos reales.
+
+El cliente HTTP común admite JSON y texto plano, `204 No Content` y cargas
+`multipart/form-data` como la importación CSV de donantes. Muestra errores de red y HTTP en pantalla. El servicio de notificaciones está configurado, aunque su historial requiere que el servicio esté en ejecución.
+
+### Compilar y servir la versión de producción
 
 ```powershell
 npm run build
 npm run preview
 ```
 
-### URLs de los servicios Java
-
-Los valores iniciales de `.env.example` corresponden a la guía de endpoints:
-
-| Variable | Servicio | Puerto local |
-|---|---|---:|
-| `VITE_API_DONACIONES` | Donaciones | 8080 |
-| `VITE_API_NOTIFICACIONES` | Notificaciones | 8081 |
-| `VITE_API_INCENTIVOS` | Incentivos | 8082 |
-| `VITE_API_LOGISTICA` | Logística | 8083 |
-| `VITE_API_AUTH` | Autenticación (aún sin endpoints) | 8084 |
-
-Actualizá `.env.local` si los servicios usan otras URLs y reiniciá Vite después
-de modificar variables. El cliente HTTP admite JSON y texto plano, `204 No
-Content`, formularios `multipart/form-data` y reporta errores de red/HTTP en la
-vista. Los endpoints de negocio se consumen con las rutas documentadas en
-`DonaTrack_Endpoints_Frontend.pdf`.
+El primer comando genera el sitio optimizado en `dist/`; el segundo lo sirve
+localmente para comprobarlo. Para detener el servidor de previsualización,
+inputar `Ctrl+C`. El despliegue final de `dist/` se hace en el hosting estático
+que elija el equipo.
 
 ### Autenticación: primera iteración y pendiente del backend
 
-La guía de endpoints indica que `servicio-autenticacion` está vacío y que las
-APIs actuales no requieren token. Por eso el frontend deja listo el servicio
-cliente, pero **el ingreso real y el SSO no funcionarán hasta que el backend
-publique y configure sus rutas**. No se simula un inicio exitoso.
+El frontend deja listo el servicio cliente, pero **el ingreso real y el SSO no funcionarán hasta que el backend publique y configure sus rutas**. No se simula un inicio exitoso.
 
 Contrato inicial propuesto para alinear con el backend:
 
@@ -93,48 +148,4 @@ renovación del token, el cierre de sesión y el contrato OAuth/OIDC; es preferi
 una cookie `HttpOnly`, `Secure`, `SameSite` antes que guardar tokens persistentes
 en JavaScript.
 
-Configurá `VITE_AUTH_GOOGLE_URL`, `VITE_AUTH_MICROSOFT_URL` y
-`VITE_AUTH_INSTITUCIONAL_URL` con las URL de autorización provistas por el
-servicio antes de habilitar Google, Microsoft o SAML. El retorno SSO esperado es
-`/#/auth/callback?code=...&state=...`; el cliente propone canjearlo contra
-`POST /api/auth/oauth/callback`, que devuelve el mismo objeto de sesión que el
-login. Los secretos de OAuth no deben ponerse en el frontend.
-
-La guía de backend tampoco expone `entidadId` en las entregas de logística. Por
-eso, el panel de entidad muestra explícitamente que falta esa relación en lugar
-de atribuir entregas de otras organizaciones. Para completar esa sección, el
-backend debe agregar la entidad a la respuesta o exponer una consulta de
-entregas por entidad.
-
-### Próximos pasos
-
-1. Acordar con el equipo Java el endpoint de login, formato de respuesta, roles,
-   expiración del token y rutas de callback SSO. Hoy esos endpoints no están en
-   la guía.
-2. Iniciar los servicios Java, configurar sus URLs y CORS para el origen
-   `http://localhost:5173` (incluyendo `Authorization` para autenticación).
-3. Probar los seis recorridos con respuestas reales; verificar especialmente
-   los IDs de usuario/entidad, estados de logística y enums de los formularios.
-4. Probar registro de donaciones, altas/importación CSV y creación de
-   necesidades con datos de desarrollo; revisar los mensajes de error del
-   backend.
-5. Antes de desplegar, configurar OAuth del lado servidor, almacenamiento de
-   sesión seguro y URLs por ambiente; correr `npm run build`.
-
-El frontend no implementa ni reemplaza los servicios Java, no incorpora
-persistencia de negocio y no incluye observabilidad, rate limiting, GraphQL ni
-gRPC (alcance de la entrega 7).
-
-Los perfiles y las acciones se controlan en el cliente sólo para la navegación
-y la experiencia de uso; no son una medida de seguridad. El backend debe validar
-el token y los permisos de cada operación antes de aceptar cambios.
-
-## Integrantes:
-- Aguero Silva Daniel - 209.526-9
-- Duran Agustina Denise - 222.281-4
-- Elías Thiago - 222.286-3
-- Letizia Joaquín - 222.458-6
-- Sarba Máximo - 216.120-6
-- Schoeffler Facundo Ezequiel - 222.696-0
-- Tilve Franco Enrique - 222.741-1
-- Tisman Facundo Martín - 214.184-0
+`entidadId` de parte de logística todavia no esta expuesto. Por eso, el panel de entidad muestra explícitamente que falta esa relación en lugar de atribuir entregas de otras organizaciones. Para completar esa sección, el backend debe agregar la entidad a la respuesta o exponer una consulta de entregas por entidad.
