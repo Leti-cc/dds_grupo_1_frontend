@@ -41,9 +41,11 @@ No se incorporaron funcionalidades de la entrega 7.
 | `routes/` | Un router por pantalla. Cada ruta consulta las APIs y hace `res.render(...)`. |
 | `middleware/` | `auth.js` (`requireRole(...)` provisorio), `flash.js` (mensajes para toasts) y `locals.js` (datos del layout). |
 | `src/services/` | Clientes HTTP de las APIs. Corren en el servidor y toman el token de `req.session`. |
+| `src/lib/` | Lógica pura y testeable: datos de cada página y, en `logistica-*.js`, formatos, validación, simulador y modelos de vista. |
 | `src/helpers/handlebars.js` | Helpers de las vistas: `statusLabel`, `eq` y `selectedIf`. |
 | `views/` | Plantillas `.hbs`; `views/layouts/main.hbs` es el layout común y `views/partials/` los parciales. |
-| `public/` | Archivos estáticos: `css/styles.css` y `js/app.js` (solo interacción: toast, toggles, campos condicionales, ver contraseña, estado de carga y barra de progreso). |
+| `public/` | Archivos estáticos: `css/styles.css`, `js/app.js` (solo interacción: toast, toggles, campos condicionales, ver contraseña, estado de carga y barra de progreso) y `js/logistica/` (modales, ayuda inicial, mapa y su polling). |
+| `test/` | Tests unitarios con `node:test`. |
 
 Los formularios hacen `POST` al servidor del front. Si la operación sale bien,
 se aplica Post/Redirect/Get con un mensaje flash que se muestra como toast. Si
@@ -100,6 +102,7 @@ navegador.
 | `SESSION_SECRET` | Secreto para firmar la cookie de sesión. Si falta, se usa uno temporal y las sesiones se pierden al reiniciar. | — |
 | `AUTH_DEV_BYPASS` | `true` saltea el control de `requireRole(...)`. Solo para desarrollo. | `false` |
 | `ENABLE_DEMO_TOOLS` | `true` muestra en Logística el botón "Simular respuesta del optimizador". Solo para la demo. | `false` |
+| `MAPA_POLLING_MS` | Cada cuántos milisegundos se actualiza el mapa de camiones. Mínimo 1000; un valor inválido usa el inicial. | `10000` |
 | `DONACIONES_API_URL` | URL base de categorías, donantes, entidades, necesidades y donaciones. | `http://localhost:8080` |
 | `NOTIFICACIONES_API_URL` | URL base del historial de notificaciones mostrado en administración. | `http://localhost:8081` |
 | `INCENTIVOS_API_URL` | URL base del perfil, las misiones, las insignias y el ranking de donantes. | `http://localhost:8082` |
@@ -133,23 +136,40 @@ npm test
 
 ### Flujo 6: Logística
 
-Sección del panel de administración, en `/admin/logistica`, con dos páginas:
-**Camiones** (listado, alta, edición y baja) y **Entregas y rutas** (entregas
-pendientes, planificación, rutas activas e inicio de ruta). El mapa en tiempo
-real todavía no está implementado.
+Sección del panel de administración, en `/admin/logistica`, con tres páginas:
+
+| Página | Ruta | Contenido |
+|---|---|---|
+| Camiones | `/admin/logistica/camiones` | Listado, alta, edición (`/camiones/:patente/editar`) y baja. |
+| Entregas y rutas | `/admin/logistica/entregas` | Entregas pendientes, planificación, rutas activas e inicio de ruta. |
+| Mapa | `/admin/logistica/mapa` | Ubicación de la flota en tiempo real, con lista accesible al lado. |
 
 Requiere una sesión con rol de administración. Mientras no exista el servicio de
 autenticación, usar `AUTH_DEV_BYPASS=true` en `.env`.
+
+El navegador nunca llama a la API de logística. Las páginas llegan renderizadas
+por el servidor del front, salvo los datos del mapa: la página consulta cada
+`MAPA_POLLING_MS` el endpoint propio `GET /admin/logistica/mapa/datos`, que
+devuelve solo `patente`, `latitud`, `longitud`, `enRuta` y `ultimaActualizacion`
+(texto relativo). El polling se pausa con la pestaña oculta y, si falla, muestra
+un aviso y reintenta en el ciclo siguiente.
+
+El mapa usa [Leaflet](https://leafletjs.com/) 1.9.4, instalado por npm y servido
+desde `/vendor/leaflet`, con tiles de OpenStreetMap, cuya atribución visible es
+obligatoria. Los tiles son lo único que el navegador pide a un servidor externo,
+así que sin internet el mapa queda sin fondo, pero los marcadores y la lista
+siguen funcionando.
 
 #### Guion de demo
 
 Preparación: backend de logística levantado y `ENABLE_DEMO_TOOLS=true` en `.env`.
 
 1. Crear 2 camiones desde la UI, en **Logística → Camiones**.
-2. Con Postman, cargar una ubicación: `PUT {LOGISTICA_API_URL}/api/logistica/camiones/AB123CD/ubicacion` con `{ "latitud": -34.60, "longitud": -58.42 }`. Al recargar, la columna **Última ubicación** muestra el tiempo transcurrido.
-3. Ir a **Entregas y rutas** (las entregas pendientes se crean solas cuando se asigna una donación en el flujo 5), tocar **Planificar rutas** y después **Simular respuesta del optimizador**.
-4. Ver la ruta activa e **Iniciar ruta**: el estado pasa a "En curso".
-5. Intentar dar de baja un camión en ruta y ver que no se puede, con la explicación.
+2. Con Postman, cargar ubicaciones: `PUT {LOGISTICA_API_URL}/api/logistica/camiones/AB123CD/ubicacion` con `{ "latitud": -34.60, "longitud": -58.42 }`.
+3. Abrir el **Mapa** y ver los marcadores. Mandar otra ubicación y ver que el marcador se mueve en unos 10 s.
+4. Ir a **Entregas y rutas** (las entregas pendientes se crean solas cuando se asigna una donación en el flujo 5), tocar **Planificar rutas** y, en modo demo, **Simular respuesta del optimizador**.
+5. Ver la ruta activa e **Iniciar ruta**: el estado pasa a "En curso".
+6. Intentar dar de baja un camión en ruta y ver que no se puede, con la explicación.
 
 ### Producción
 

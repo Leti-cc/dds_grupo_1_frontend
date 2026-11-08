@@ -35,6 +35,7 @@ app.set("views", path.join(rootDir, "views"));
 app.disable("x-powered-by");
 
 app.use(express.static(path.join(rootDir, "public")));
+app.use("/vendor/leaflet", express.static(path.join(rootDir, "node_modules", "leaflet", "dist")));
 app.use(express.urlencoded({ extended: false }));
 
 let sessionSecret = process.env.SESSION_SECRET;

@@ -25,4 +25,16 @@ export const AUTH_DEV_BYPASS = env.AUTH_DEV_BYPASS === "true";
 
 export const ENABLE_DEMO_TOOLS = env.ENABLE_DEMO_TOOLS === "true";
 
+const POLLING_MAPA_POR_DEFECTO_MS = 10000;
+const POLLING_MAPA_MINIMO_MS = 1000;
+
+export function leerPollingMs(valor) {
+  const milisegundos = Number(valor);
+  return Number.isFinite(milisegundos) && milisegundos >= POLLING_MAPA_MINIMO_MS
+    ? milisegundos
+    : POLLING_MAPA_POR_DEFECTO_MS;
+}
+
+export const MAPA_POLLING_MS = leerPollingMs(env.MAPA_POLLING_MS);
+
 export const REMEMBER_SESSION_MS = 30 * 24 * 60 * 60 * 1000;

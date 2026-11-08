@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { ENABLE_DEMO_TOOLS } from "../src/config.js";
+import { ENABLE_DEMO_TOOLS, MAPA_POLLING_MS } from "../src/config.js";
 import { armarRutasSimuladas } from "../src/lib/logistica-simulador.js";
 import { validarCamion } from "../src/lib/logistica-validacion.js";
 import {
+  datosMapa,
   textoEntregasPendientes,
   vistaCamion,
   vistaEntrega,
@@ -18,6 +19,7 @@ const URL_ENTREGAS = "/admin/logistica/entregas";
 const VISTA_CAMIONES = "admin/logistica/camiones";
 const VISTA_EDITAR = "admin/logistica/camion-editar";
 const VISTA_ENTREGAS = "admin/logistica/entregas";
+const VISTA_MAPA = "admin/logistica/mapa";
 
 const BANNER_PLANIFICACION =
   "Se envió la solicitud de planificación. Las rutas aparecerán cuando el optimizador responda.";
@@ -252,6 +254,30 @@ router.post("/rutas/:patente/iniciar", async (req, res) => {
     req.flash({ type: "error", toast: mensajeDe(error, `No se pudo iniciar la ruta del camión ${patente}.`) });
   }
   res.redirect(URL_ENTREGAS);
+});
+
+/* ---------- Mapa ---------- */
+
+// La página llega sin datos: los trae el navegador por polling contra /mapa/datos.
+router.get("/mapa", (req, res) => {
+  res.render(VISTA_MAPA, {
+    title: "Mapa · Logística",
+    tab: "mapa",
+    leaflet: true,
+    pollingMs: MAPA_POLLING_MS,
+  });
+});
+
+// Endpoint del front: el navegador le pega a este, nunca a la API de logística.
+router.get("/mapa/datos", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    res.json(datosMapa(readArray(await logistica.listarCamiones(req), "camiones")));
+  } catch (error) {
+    res.status(logistica.esServicioNoDisponible(error) ? 503 : 502).json({
+      mensaje: mensajeDe(error, "No se pudo actualizar el mapa."),
+    });
+  }
 });
 
 export default router;

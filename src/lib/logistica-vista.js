@@ -12,6 +12,17 @@ export function vistaCamion(camion, ahora = Date.now()) {
   };
 }
 
+/** Lo único que recibe el navegador para el mapa, en el formato de /admin/logistica/mapa/datos. */
+export function datosMapa(camiones, ahora = Date.now()) {
+  return camiones.map((camion) => ({
+    patente: camion.patente,
+    latitud: camion.latitud ?? null,
+    longitud: camion.longitud ?? null,
+    enRuta: camion.rutaActiva != null,
+    ultimaActualizacion: fechaRelativa(camion.ultimaActualizacionUbicacion, ahora),
+  }));
+}
+
 export function vistaEntrega(entrega) {
   return { ...entrega, fechaCreacionTexto: fechaHora(entrega.fechaCreacion) };
 }
