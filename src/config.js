@@ -23,4 +23,6 @@ export const OAUTH_URLS = Object.freeze({
 
 export const AUTH_DEV_BYPASS = env.AUTH_DEV_BYPASS === "true";
 
+export const ENABLE_DEMO_TOOLS = env.ENABLE_DEMO_TOOLS === "true";
+
 export const REMEMBER_SESSION_MS = 30 * 24 * 60 * 60 * 1000;

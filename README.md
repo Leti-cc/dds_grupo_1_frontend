@@ -99,6 +99,7 @@ navegador.
 | `PORT` | Puerto del servidor del front. | `3000` |
 | `SESSION_SECRET` | Secreto para firmar la cookie de sesión. Si falta, se usa uno temporal y las sesiones se pierden al reiniciar. | — |
 | `AUTH_DEV_BYPASS` | `true` saltea el control de `requireRole(...)`. Solo para desarrollo. | `false` |
+| `ENABLE_DEMO_TOOLS` | `true` muestra en Logística el botón "Simular respuesta del optimizador". Solo para la demo. | `false` |
 | `DONACIONES_API_URL` | URL base de categorías, donantes, entidades, necesidades y donaciones. | `http://localhost:8080` |
 | `NOTIFICACIONES_API_URL` | URL base del historial de notificaciones mostrado en administración. | `http://localhost:8081` |
 | `INCENTIVOS_API_URL` | URL base del perfil, las misiones, las insignias y el ranking de donantes. | `http://localhost:8082` |
@@ -123,6 +124,32 @@ falta configurar CORS** en los servicios. El cliente HTTP común admite JSON y
 texto plano, `204 No Content` y cargas `multipart/form-data` como la importación
 CSV de donantes. Corta cada llamada a los 5 segundos, muestra errores de red y
 HTTP en pantalla y deja el detalle en la consola del servidor.
+
+### Tests
+
+```powershell
+npm test
+```
+
+### Flujo 6: Logística
+
+Sección del panel de administración, en `/admin/logistica`, con dos páginas:
+**Camiones** (listado, alta, edición y baja) y **Entregas y rutas** (entregas
+pendientes, planificación, rutas activas e inicio de ruta). El mapa en tiempo
+real todavía no está implementado.
+
+Requiere una sesión con rol de administración. Mientras no exista el servicio de
+autenticación, usar `AUTH_DEV_BYPASS=true` en `.env`.
+
+#### Guion de demo
+
+Preparación: backend de logística levantado y `ENABLE_DEMO_TOOLS=true` en `.env`.
+
+1. Crear 2 camiones desde la UI, en **Logística → Camiones**.
+2. Con Postman, cargar una ubicación: `PUT {LOGISTICA_API_URL}/api/logistica/camiones/AB123CD/ubicacion` con `{ "latitud": -34.60, "longitud": -58.42 }`. Al recargar, la columna **Última ubicación** muestra el tiempo transcurrido.
+3. Ir a **Entregas y rutas** (las entregas pendientes se crean solas cuando se asigna una donación en el flujo 5), tocar **Planificar rutas** y después **Simular respuesta del optimizador**.
+4. Ver la ruta activa e **Iniciar ruta**: el estado pasa a "En curso".
+5. Intentar dar de baja un camión en ruta y ver que no se puede, con la explicación.
 
 ### Producción
 

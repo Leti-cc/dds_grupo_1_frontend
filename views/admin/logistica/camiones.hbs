@@ -1,0 +1,90 @@
+<div class="logistica">
+  <section class="page-heading dashboard-heading">
+    <div><p class="eyebrow">Administración · Logística</p><h1>Camiones</h1><p class="lead">Consultá la flota y mantené sus datos al día.</p></div>
+    <button class="button button-primary" type="button" data-dialog-open="alta-camion">Nuevo camión</button>
+  </section>
+
+  {{> logistica-tabs}}
+
+  <aside class="hint" data-hint="logistica-camiones" aria-label="Ayuda" hidden>
+    <p>Acá gestionás la flota. Un camión con ruta activa no se puede dar de baja hasta que termine sus entregas.</p>
+    <button class="hint-close" type="button" aria-label="Cerrar ayuda" data-hint-close><span aria-hidden="true">×</span></button>
+  </aside>
+
+  {{#if servicioNoDisponible}}{{> logistica-no-disponible url="/admin/logistica/camiones"}}{{/if}}
+  {{#if errorCarga}}<p class="notice notice-error" role="alert">{{errorCarga}}</p>{{/if}}
+
+  {{#if camiones.length}}
+  <section class="surface-card section-block" aria-labelledby="flota-titulo">
+    <h2 class="visually-hidden" id="flota-titulo">Flota activa</h2>
+    <div class="table-wrap table-wrap-visible">
+      <table class="table-cards" role="table" aria-labelledby="flota-titulo">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">Patente</th>
+            <th role="columnheader" scope="col">Capacidad de carga (kg)</th>
+            <th role="columnheader" scope="col">Volumen (m³)</th>
+            <th role="columnheader" scope="col">Altura (m)</th>
+            <th role="columnheader" scope="col">Estado</th>
+            <th role="columnheader" scope="col">Última ubicación</th>
+            <th role="columnheader" scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {{#each camiones}}
+          <tr role="row">
+            <td role="cell" data-label="Patente"><strong>{{patente}}</strong></td>
+            <td role="cell" data-label="Capacidad de carga (kg)">{{cargaTexto}}</td>
+            <td role="cell" data-label="Volumen (m³)">{{volumenTexto}}</td>
+            <td role="cell" data-label="Altura (m)">{{alturaTexto}}</td>
+            <td role="cell" data-label="Estado">{{#if enRuta}}<span class="tag tag-blue">En ruta</span>{{else}}<span class="tag tag-green">Disponible</span>{{/if}}</td>
+            <td role="cell" data-label="Última ubicación">{{ultimaUbicacion}}</td>
+            <td role="cell" data-label="Acciones">
+              <div class="table-actions">
+                <a class="button button-outline button-small" href="/admin/logistica/camiones/{{patenteUrl}}/editar" aria-label="Editar camión {{patente}}">Editar</a>
+                {{#if enRuta}}
+                <span class="tooltip-wrap">
+                  <button class="button button-outline button-small" type="button" aria-disabled="true" aria-label="Dar de baja el camión {{patente}}" aria-describedby="baja-tip-{{@index}}">Dar de baja</button>
+                  <span class="tooltip tooltip-end" id="baja-tip-{{@index}}" role="tooltip">Tiene una ruta activa: no se puede dar de baja</span>
+                </span>
+                {{else}}
+                <button class="button button-outline button-small" type="button" data-dialog-open="baja-{{@index}}" aria-label="Dar de baja el camión {{patente}}">Dar de baja</button>
+                {{/if}}
+              </div>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {{else if listadoCargado}}
+  <section class="surface-card section-block"><div class="empty-state"><strong>Todavía no hay camiones. Cargá el primero con el botón 'Nuevo camión'.</strong></div></section>
+  {{/if}}
+
+  {{#each camiones}}
+  {{#unless enRuta}}
+  <dialog class="dialog" id="baja-{{@index}}" aria-labelledby="baja-titulo-{{@index}}" aria-describedby="baja-texto-{{@index}}">
+    <h2 id="baja-titulo-{{@index}}">Confirmar baja</h2>
+    <p id="baja-texto-{{@index}}">¿Dar de baja el camión {{patente}}? Deja de estar disponible para planificar rutas.</p>
+    <form class="dialog-actions" id="baja-form-{{@index}}" method="post" action="/admin/logistica/camiones/{{patenteUrl}}/baja">
+      <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+      <button class="button button-danger" type="submit" data-busy-text="Dando de baja…">Dar de baja</button>
+    </form>
+  </dialog>
+  {{/unless}}
+  {{/each}}
+
+  <dialog class="dialog" id="alta-camion" aria-labelledby="alta-titulo"{{#if abrirAlta}} data-dialog-abierto{{/if}}>
+    <h2 id="alta-titulo">Nuevo camión</h2>
+    <form class="form-stack" id="alta-camion-form" method="post" action="/admin/logistica/camiones">
+      {{> logistica-camion-campos prefijo="alta"}}
+      <div class="dialog-actions">
+        <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+        <button class="button button-primary" type="submit" data-busy-text="Guardando…">Guardar camión</button>
+      </div>
+    </form>
+  </dialog>
+</div>
+<script type="module" src="/js/logistica/modales.js"></script>
+<script type="module" src="/js/logistica/camiones.js"></script>

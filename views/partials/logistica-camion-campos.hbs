@@ -1,0 +1,42 @@
+{{#if errorFormulario}}<p class="notice notice-error" role="alert">{{errorFormulario}}</p>{{/if}}
+<div class="field">
+  <div class="field-head">
+    <label for="{{prefijo}}-patente">Patente</label>
+    {{#unless soloLectura}}
+    <span class="tooltip-wrap">
+      <button class="tooltip-trigger" type="button" aria-label="Ayuda sobre la patente" aria-describedby="{{prefijo}}-patente-tip">?</button>
+      <span class="tooltip" id="{{prefijo}}-patente-tip" role="tooltip">Formato viejo (ABC123) o Mercosur (AB123CD), sin espacios ni guiones</span>
+    </span>
+    {{/unless}}
+  </div>
+  {{#if soloLectura}}
+  <input id="{{prefijo}}-patente" name="patente" value="{{valores.patente}}" readonly aria-describedby="{{prefijo}}-patente-nota">
+  <p class="field-note" id="{{prefijo}}-patente-nota">La patente no se puede modificar.</p>
+  {{else}}
+  <input id="{{prefijo}}-patente" name="patente" value="{{valores.patente}}" required autofocus maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ej.: AB123CD o ABC123" pattern="^[A-Z]{3}[0-9]{3}$|^[A-Z]{2}[0-9]{3}[A-Z]{2}$" title="Formato ABC123 o AB123CD, sin espacios ni guiones" data-mayusculas{{#if errores.patente}} aria-invalid="true" aria-describedby="{{prefijo}}-patente-error"{{/if}}>
+  {{#if errores.patente}}<p class="field-error" id="{{prefijo}}-patente-error">{{errores.patente}}</p>{{/if}}
+  {{/if}}
+</div>
+<div class="form-columnas">
+  <div class="field">
+    <div class="field-head"><label for="{{prefijo}}-carga">Capacidad de carga (kg)</label></div>
+    <input id="{{prefijo}}-carga" name="capacidadCarga" type="number" inputmode="decimal" step="any" min="0.01" required value="{{valores.capacidadCarga}}" placeholder="Ej.: 1500"{{#if errores.capacidadCarga}} aria-invalid="true" aria-describedby="{{prefijo}}-carga-error"{{/if}}>
+    {{#if errores.capacidadCarga}}<p class="field-error" id="{{prefijo}}-carga-error">{{errores.capacidadCarga}}</p>{{/if}}
+  </div>
+  <div class="field">
+    <div class="field-head"><label for="{{prefijo}}-volumen">Volumen (m³)</label></div>
+    <input id="{{prefijo}}-volumen" name="capacidadVolumen" type="number" inputmode="decimal" step="any" min="0.01" required value="{{valores.capacidadVolumen}}" placeholder="Ej.: 10"{{#if errores.capacidadVolumen}} aria-invalid="true" aria-describedby="{{prefijo}}-volumen-error"{{/if}}>
+    {{#if errores.capacidadVolumen}}<p class="field-error" id="{{prefijo}}-volumen-error">{{errores.capacidadVolumen}}</p>{{/if}}
+  </div>
+  <div class="field">
+    <div class="field-head">
+      <label for="{{prefijo}}-altura">Altura (m)</label>
+      <span class="tooltip-wrap">
+        <button class="tooltip-trigger" type="button" aria-label="Ayuda sobre la altura" aria-describedby="{{prefijo}}-altura-tip">?</button>
+        <span class="tooltip" id="{{prefijo}}-altura-tip" role="tooltip">Altura total del camión, la usa el optimizador para planificar rutas</span>
+      </span>
+    </div>
+    <input id="{{prefijo}}-altura" name="altura" type="number" inputmode="decimal" step="any" min="0.01" required value="{{valores.altura}}" placeholder="Ej.: 2.5"{{#if errores.altura}} aria-invalid="true" aria-describedby="{{prefijo}}-altura-error"{{/if}}>
+    {{#if errores.altura}}<p class="field-error" id="{{prefijo}}-altura-error">{{errores.altura}}</p>{{/if}}
+  </div>
+</div>

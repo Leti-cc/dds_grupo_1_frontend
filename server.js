@@ -6,11 +6,13 @@ import express from "express";
 import { engine } from "express-handlebars";
 import session from "express-session";
 import { flash } from "./middleware/flash.js";
+import { requireRole } from "./middleware/auth.js";
 import { layoutLocals } from "./middleware/locals.js";
 import adminRoutes from "./routes/admin.js";
 import authRoutes from "./routes/auth.js";
 import donorRoutes from "./routes/donor.js";
 import entityRoutes from "./routes/entity.js";
+import logisticaRoutes from "./routes/logistica.js";
 import publicRoutes from "./routes/public.js";
 import { AUTH_DEV_BYPASS, PORT } from "./src/config.js";
 import { helpers } from "./src/helpers/handlebars.js";
@@ -61,6 +63,7 @@ app.use(authRoutes);
 app.use(donorRoutes);
 app.use(entityRoutes);
 app.use(adminRoutes);
+app.use("/admin/logistica", requireRole("ADMIN"), logisticaRoutes);
 
 // Igual que la SPA: una ruta desconocida vuelve al inicio.
 app.use((req, res) => {
