@@ -1690,3 +1690,15 @@ td small {
     animation-iteration-count: 1 !important;
   }
 }
+
+  /*INCENTIVOS*/
+.progress { height: 10px; margin: 8px 0 6px; overflow: hidden; background: var(--surface-selected); border-radius: 999px; }
+.progress > span { display: block; height: 100%; background: var(--green); border-radius: 999px; transition: width 300ms ease; }
+.mission-list .mission-body { flex: 1; }
+.evo-chart { display: flex; height: 140px; align-items: flex-end; gap: 8px; padding: 8px 0; }
+.evo-col { display: flex; height: 100%; flex: 1; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-width: 24px; }
+.evo-bar { display: block; width: 100%; min-height: 3px; background: var(--primary); border-radius: 6px 6px 0 0; }
+.evo-col small { color: var(--muted); font-size: 11px; }
+.badge-icon { position: relative; overflow: hidden; }
+.badge-icon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #fff; }
+.badge-icon { width: 56px; height: 56px; }

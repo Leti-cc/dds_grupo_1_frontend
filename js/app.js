@@ -6,6 +6,7 @@ import layoutTemplate from "../templates/layout.hbs?raw";
 import loginTemplate from "../templates/login.hbs?raw";
 import publicTemplate from "../templates/public.hbs?raw";
 import trackingTemplate from "../templates/tracking.hbs?raw";
+import incentivosTemplate from "../templates/incentivos.hbs?raw";
 import { authService } from "./services/auth-service.js";
 import { donatrackService } from "./services/donatrack-service.js";
 
@@ -19,7 +20,9 @@ const templates = {
   login: Handlebars.compile(loginTemplate),
   public: Handlebars.compile(publicTemplate),
   tracking: Handlebars.compile(trackingTemplate),
+  incentivos: Handlebars.compile(incentivosTemplate),
 };
+Handlebars.registerPartial("incentivos", incentivosTemplate);
 const routes = [
   { path: "/inicio", template: "public", label: "Inicio" },
   { path: "/seguimiento", template: "tracking", label: "Seguimiento" },
@@ -178,6 +181,10 @@ async function loadDonorPage() {
   ]);
   const rankedDonors = ranking.data?.losDestacados;
 
+  const evo = profile.data?.evolucionDonacionesPorPeriodo ?? [];
+  const maxEvo = Math.max(1, ...evo);
+  const cambio = profile.data?.comparacionMensual;
+
   return {
     userName: username,
     profile: {
@@ -185,6 +192,10 @@ async function loadDonorPage() {
       donationHistory: profile.data?.donaciones ?? [],
       points: profile.data?.impactoAcumulado ?? "—",
       level: profile.data?.categoriaActual ?? "Sin categoría",
+      organizations: profile.data?.totalOrganizacionesAyudadas ?? "—",
+      position: profile.data?.posicionRanking || "—",
+      monthChange: cambio == null ? "—" : `${cambio > 0 ? "+" : ""}${Math.round(cambio)}%`,
+      evolution: evo.map((v) => ({ value: v, height: Math.round((v / maxEvo) * 100) })),
     },
     missions:
       missions.data?.map((mission) => ({
@@ -192,6 +203,7 @@ async function loadDonorPage() {
         completada:
           mission.distanciaRestante === 0 ||
           mission.progresoActual >= mission.objetivo,
+          porcentaje: Math.min(100, Math.round((mission.progresoActual / mission.objetivo) * 100)),
       })) ?? [],
     badges: badges.data ?? [],
     ranking: Array.isArray(rankedDonors) ? rankedDonors : [],
