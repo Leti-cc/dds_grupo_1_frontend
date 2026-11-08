@@ -1,0 +1,20 @@
+<section class="page-heading dashboard-heading">
+  <div><p class="eyebrow">Espacio de donante</p><h1>Hola{{#if userName}}, {{userName}}{{/if}}</h1><p class="lead">Consultá tus aportes, misiones e impacto en la red.</p></div>
+  {{#if userName}}<span class="tag tag-violet">Perfil: {{userName}}</span>{{else}}<a class="button button-primary" href="/login">Ingresar</a>{{/if}}
+</section>
+{{#if errors.profile}}<p class="notice notice-error">{{errors.profile}}</p>{{/if}}
+{{#if authMessage}}<p class="notice notice-info">{{authMessage}} <a href="/login">Ingresar</a></p>{{/if}}
+<section class="metric-grid">
+  <article class="metric-card"><span>Donaciones</span><strong>{{profile.donations}}</strong><small>Según perfil de incentivos</small></article>
+  <article class="metric-card metric-green"><span>Impacto acumulado</span><strong>{{profile.points}}</strong><small>{{profile.level}}</small></article>
+  <article class="metric-card metric-blue"><span>Misiones</span><strong>{{missions.length}}</strong><small>Progreso del período</small></article>
+  <article class="metric-card metric-violet"><span>Insignias</span><strong>{{badges.length}}</strong><small>En tu vitrina</small></article>
+</section>
+<section class="surface-card section-block">
+  <div class="section-heading"><div><p class="eyebrow">Actividad</p><h2>Mis aportes recientes</h2></div></div>
+  {{#if profile.donationHistory.length}}<ul class="data-list">{{#each profile.donationHistory}}<li><div><strong>{{subcategoria}}</strong><small>{{#each bienes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} · {{organizacion}}</small></div><time class="muted">{{fechaIngreso}}</time></li>{{/each}}</ul>
+  {{else if errors.profile}}<div class="empty-state compact">No se pudo cargar el historial de aportes.</div>
+  {{else}}<div class="empty-state compact">No hay aportes para mostrar.</div>{{/if}}
+</section>
+
+{{> incentivos}}

@@ -1,4 +1,4 @@
-import { ACCESS_TOKEN_KEY, API_URLS } from "../config.js";
+import { API_TIMEOUT_MS, API_URLS } from "../config.js";
 
 export class ApiError extends Error {
   constructor(message, { status = 0, data = null } = {}) {
@@ -9,18 +9,16 @@ export class ApiError extends Error {
   }
 }
 
-function getAccessToken() {
-  return (
-    window.sessionStorage.getItem(ACCESS_TOKEN_KEY) ??
-    window.localStorage.getItem(ACCESS_TOKEN_KEY)
-  );
-}
-
-function readResponseBody(text) {
+export function parseResponseBody(text, contentType = "") {
   if (!text) {
     return null;
   }
 
+  if (contentType.startsWith("text/")) {
+    return text;
+  }
+
+  // JSON declarado o content-type ausente: se intenta JSON y, si no parsea, texto.
   try {
     return JSON.parse(text);
   } catch {
@@ -40,10 +38,15 @@ function getErrorMessage(data, statusText) {
   return statusText || "No se pudo completar la solicitud.";
 }
 
+/**
+ * Llama a una API REST desde el servidor del front.
+ * El token sale de la sesión del servidor (req.session.accessToken) y nunca llega al navegador.
+ */
 export async function apiRequest(
+  req,
   service,
   path,
-  { method = "GET", body, form, headers = {}, signal } = {},
+  { method = "GET", body, form, headers = {}, timeoutMs = API_TIMEOUT_MS } = {},
 ) {
   const baseUrl = API_URLS[service];
   if (!baseUrl) {
@@ -51,6 +54,7 @@ export async function apiRequest(
   }
 
   const normalizedPath = `/${String(path).replace(/^\/+/, "")}`;
+  const url = `${baseUrl.replace(/\/+$/, "")}${normalizedPath}`;
   const requestHeaders = new Headers(headers);
   requestHeaders.set("Accept", "application/json, text/plain");
 
@@ -61,33 +65,40 @@ export async function apiRequest(
     requestHeaders.delete("Content-Type");
   }
 
-  const token = getAccessToken();
+  const token = req?.session?.accessToken;
   if (token) {
     requestHeaders.set("Authorization", `Bearer ${token}`);
   }
 
   let response;
   try {
-    response = await fetch(`${baseUrl.replace(/\/+$/, "")}${normalizedPath}`, {
+    response = await fetch(url, {
       method,
       headers: requestHeaders,
       ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
       ...(form !== undefined ? { body: form } : {}),
-      signal,
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (error) {
-    if (error.name === "AbortError") {
-      throw error;
-    }
-
+    const timedOut = error.name === "TimeoutError" || error.name === "AbortError";
+    console.error(`[api] ${method} ${url} falló: ${error.cause?.code ?? error.name} ${error.message}`);
     throw new ApiError(
-      `No se pudo conectar con ${service}. Verificá que el servicio esté iniciado y su URL configurada.`,
+      timedOut
+        ? `El servicio de ${service} no respondió a tiempo. Reintentá en unos segundos.`
+        : `No se pudo conectar con ${service}. Verificá que el servicio esté iniciado y su URL configurada.`,
       { data: error },
     );
   }
 
-  const data = readResponseBody(await response.text());
+  const data = parseResponseBody(
+    await response.text(),
+    response.headers.get("content-type") ?? "",
+  );
   if (!response.ok) {
+    console.error(
+      `[api] ${method} ${url} respondió ${response.status}:`,
+      typeof data === "string" ? data : JSON.stringify(data),
+    );
     throw new ApiError(getErrorMessage(data, response.statusText), {
       status: response.status,
       data,

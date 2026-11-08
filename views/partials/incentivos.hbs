@@ -1,0 +1,59 @@
+<section class="surface-card section-block" aria-labelledby="impacto-titulo">
+  <div class="section-heading"><div><p class="eyebrow">Incentivos</p><h2 id="impacto-titulo">Mi impacto</h2><p>Categoría actual: <strong>{{profile.level}}</strong></p></div></div>
+  {{#if errors.profile}}<p class="notice notice-error" role="alert">{{errors.profile}}</p>{{/if}}
+  <div class="metric-grid">
+    <article class="metric-card metric-green"><span>Bienes donados</span><strong>{{profile.points}}</strong><small>Impacto acumulado</small></article>
+    <article class="metric-card metric-blue"><span>Organizaciones ayudadas</span><strong>{{profile.organizations}}</strong><small>Distintas entidades</small></article>
+    <article class="metric-card metric-violet"><span>Posición en el ranking</span><strong>{{profile.position}}</strong><small>Según cantidad de donaciones</small></article>
+    <article class="metric-card"><span>Vs. mes anterior</span><strong>{{profile.monthChange}}</strong><small>Bienes donados este mes</small></article>
+  </div>
+  {{#if profile.evolution.length}}
+  <h3>Evolución por mes</h3>
+  <div class="evo-chart" role="img" aria-label="Gráfico de bienes donados por mes">
+    {{#each profile.evolution}}<div class="evo-col" title="{{value}} bienes"><span class="evo-bar" style="height: {{height}}%"></span><small>{{value}}</small></div>{{/each}}
+  </div>
+  {{/if}}
+</section>
+
+<section class="dashboard-grid">
+  <div class="surface-card">
+    <div class="section-heading"><div><p class="eyebrow">Incentivos</p><h2>Misiones</h2><p>Completalas para ganar insignias y subir de categoría.</p></div></div>
+    {{#if errors.missions}}<p class="notice notice-error" role="alert">{{errors.missions}}</p>{{/if}}
+    {{#if missions.length}}
+      <ul class="data-list mission-list">
+      {{#each missions}}
+        <li>
+          <div class="mission-body">
+            <strong>{{descripcion}}</strong>
+            <div class="progress" role="progressbar" aria-label="Progreso: {{descripcion}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{porcentaje}}"><span style="width: {{porcentaje}}%"></span></div>
+            <small>{{progresoActual}} de {{objetivo}} · Premio: {{nombreInsigniaPremio}}</small>
+          </div>
+          <span class="tag {{#if completada}}tag-green{{else}}tag-blue{{/if}}">{{#if completada}}Completada{{else}}{{porcentaje}}%{{/if}}</span>
+        </li>
+      {{/each}}
+      </ul>
+    {{else if errors.missions}}<div class="empty-state compact">No se pudieron cargar las misiones.</div>
+    {{else}}<div class="empty-state compact">Todavía no hay misiones. Registrá tu primera donación para empezar.</div>{{/if}}
+  </div>
+  <div class="surface-card">
+    <div class="section-heading"><div><p class="eyebrow">Comunidad</p><h2>Podio del mes</h2><p>Los 3 donantes con más misiones cumplidas.</p></div></div>
+    {{#if errors.ranking}}<p class="notice notice-error" role="alert">{{errors.ranking}}</p>{{/if}}
+    {{#if ranking.length}}<ol class="ranking-list">{{#each ranking}}<li><span class="rank-number">{{puesto}}</span><strong>{{nombreUsuario}}</strong><span>{{misionesLogradas}} misiones</span></li>{{/each}}</ol>
+    {{else if errors.ranking}}<div class="empty-state compact">El ranking no está disponible.</div>
+    {{else}}<div class="empty-state compact">Todavía no hay un ranking publicado.</div>{{/if}}
+  </div>
+</section>
+
+<section class="surface-card section-block">
+  <div class="section-heading"><div><p class="eyebrow">Reconocimientos</p><h2>Mi vitrina</h2></div></div>
+  {{#if errors.badges}}<p class="notice notice-error" role="alert">{{errors.badges}}</p>{{/if}}
+  {{#if badges.length}}
+    <div class="badge-grid">{{#each badges}}
+      <article class="badge-card">
+        <span class="badge-icon" aria-hidden="true">✦<img src="{{urlImagenIcono}}" alt="" loading="lazy" onerror="this.hidden=true"></span>
+        <strong>{{nombre}}</strong>
+      </article>
+    {{/each}}</div>
+  {{else if errors.badges}}<div class="empty-state compact">No se pudieron cargar las insignias.</div>
+  {{else}}<div class="empty-state compact">Las insignias que ganes aparecen acá.</div>{{/if}}
+</section>
