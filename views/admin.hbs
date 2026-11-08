@@ -2,7 +2,7 @@
   <div><p class="eyebrow">Operación solidaria</p><h1>Administración y logística</h1><p class="lead">Consultá recursos de donaciones, transporte y donantes de la red.</p></div>
   <span class="tag tag-green">Panel de gestión</span>
 </section>
-{{#if authMessage}}<p class="notice notice-info">{{authMessage}} <a href="#/login">Ingresar</a></p>{{/if}}
+{{#if authMessage}}<p class="notice notice-info">{{authMessage}} <a href="/login">Ingresar</a></p>{{/if}}
 <section class="metric-grid">
   <article class="metric-card"><span>Donaciones registradas</span><strong>{{metrics.donations}}</strong><small>Servicio de donaciones</small></article>
   <article class="metric-card metric-blue"><span>Donantes</span><strong>{{metrics.donors}}</strong><small>Personas y organizaciones</small></article>
@@ -17,14 +17,14 @@
 <section class="dashboard-grid admin-grid">
   <div class="surface-card">
     <div class="section-heading"><div><p class="eyebrow">Inventario de la red</p><h2>Donaciones recientes</h2></div>{{#if canManage}}<button class="button button-primary button-small" type="button" data-action="toggle-donation-form">Registrar donación</button>{{/if}}</div>
-    {{#if canManage}}<form id="donation-form" class="form-stack form-panel" hidden>
-      <label class="field"><span>Donante</span><select name="donanteId" required><option value="">Seleccioná un donante</option>{{#each donors}}<option value="{{id}}">{{donorLabel}}</option>{{/each}}</select></label>
-      <label class="field"><span>Descripción de la donación</span><input name="descripcion" required maxlength="250" placeholder="Descripción general"></label>
-      <label class="field"><span>Subcategoría del bien</span><select name="subcategoriaId" required><option value="">Seleccioná una subcategoría</option>{{#each subcategories}}<option value="{{id}}">{{nombre}}</option>{{/each}}</select></label>
-      <label class="field"><span>Nombre del bien</span><input name="nombre" required maxlength="100" placeholder="Ej.: Alimentos no perecederos"></label>
-      <div class="recurring-fields"><label class="field"><span>Cantidad de unidades</span><input name="cantidad" type="number" min="1" required></label><label class="field"><span>Unidad</span><select name="unidad"><option value="UNIDAD">Unidad</option><option value="KILOGRAMO">Kilogramo</option><option value="GRAMO">Gramo</option><option value="LITRO">Litro</option></select></label></div>
-      <label class="field"><span>Vencimiento (si aplica)</span><input name="fechaVencimiento" type="date"></label>
-      <p id="donation-error" class="notice notice-error" role="alert" hidden></p>
+    {{#if canManage}}<form id="donation-form" class="form-stack form-panel" method="post" action="/administracion/donaciones" {{#unless formErrors.donation}}hidden{{/unless}}>
+      <label class="field"><span>Donante</span><select name="donanteId" required><option value="">Seleccioná un donante</option>{{#each donors}}<option value="{{id}}" {{selectedIf id ../values.donation.donanteId}}>{{donorLabel}}</option>{{/each}}</select></label>
+      <label class="field"><span>Descripción de la donación</span><input name="descripcion" required maxlength="250" placeholder="Descripción general" value="{{values.donation.descripcion}}"></label>
+      <label class="field"><span>Subcategoría del bien</span><select name="subcategoriaId" required><option value="">Seleccioná una subcategoría</option>{{#each subcategories}}<option value="{{id}}" {{selectedIf id ../values.donation.subcategoriaId}}>{{nombre}}</option>{{/each}}</select></label>
+      <label class="field"><span>Nombre del bien</span><input name="nombre" required maxlength="100" placeholder="Ej.: Alimentos no perecederos" value="{{values.donation.nombre}}"></label>
+      <div class="recurring-fields"><label class="field"><span>Cantidad de unidades</span><input name="cantidad" type="number" min="1" required value="{{values.donation.cantidad}}"></label><label class="field"><span>Unidad</span><select name="unidad"><option value="UNIDAD">Unidad</option><option value="KILOGRAMO" {{selectedIf "KILOGRAMO" values.donation.unidad}}>Kilogramo</option><option value="GRAMO" {{selectedIf "GRAMO" values.donation.unidad}}>Gramo</option><option value="LITRO" {{selectedIf "LITRO" values.donation.unidad}}>Litro</option></select></label></div>
+      <label class="field"><span>Vencimiento (si aplica)</span><input name="fechaVencimiento" type="date" value="{{values.donation.fechaVencimiento}}"></label>
+      <p id="donation-error" class="notice notice-error" role="alert" {{#unless formErrors.donation}}hidden{{/unless}}>{{formErrors.donation}}</p>
       <button class="button button-primary" type="submit">Guardar donación</button>
     </form>{{/if}}
     {{#if donations.length}}<div class="table-wrap"><table><thead><tr><th>ID</th><th>Descripción</th><th>Subcategoría</th><th>Estado</th></tr></thead><tbody>{{#each donations}}<tr><td>#{{id}}</td><td>{{descripcion}}</td><td>{{subcategoriaNombre}}</td><td><span class="tag tag-blue">{{statusLabel estado}}</span></td></tr>{{/each}}</tbody></table></div>
@@ -35,9 +35,11 @@
     <div class="section-heading"><div><p class="eyebrow">Gestión de donantes</p><h2>Importación por CSV</h2></div></div>
     <p class="section-description">Importá o actualizá donantes con la plantilla de seis columnas indicada por el backend.</p>
     {{#if canManage}}
-    <form id="import-donors-form" class="form-stack">
+    <form id="import-donors-form" class="form-stack" method="post" action="/administracion/donantes/importacion" enctype="multipart/form-data">
       <label class="field"><span>Archivo CSV</span><input name="file" type="file" accept=".csv,text/csv" required></label>
-      <p id="import-result" class="notice notice-info" role="status" hidden></p>
+      {{#if formErrors.import}}<p id="import-result" class="notice notice-info" role="status" data-state="error">{{formErrors.import}}</p>
+      {{else if (eq flash.form "import")}}<p id="import-result" class="notice notice-info" role="status" data-state="{{flash.type}}">{{flash.message}}</p>
+      {{else}}<p id="import-result" class="notice notice-info" role="status" hidden></p>{{/if}}
       <button class="button button-outline" type="submit">Importar donantes</button>
     </form>
     {{/if}}
@@ -58,19 +60,19 @@
 <section class="surface-card section-block">
   <div class="section-heading"><div><p class="eyebrow">Alta</p><h2>Registrar donante</h2></div></div>
   {{#if canManage}}
-  <form id="donor-form" class="form-grid">
-    <label class="field"><span>Tipo de persona</span><select name="tipo"><option value="HUMANA">Persona humana</option><option value="JURIDICA">Persona jurídica</option></select></label>
-    <label class="field"><span>Correo de contacto</span><input name="email" type="email" required></label>
-    <label class="field human-field"><span>Nombre</span><input name="nombre"></label>
-    <label class="field human-field"><span>Apellido</span><input name="apellido"></label>
-    <label class="field human-field"><span>DNI</span><input name="dni" inputmode="numeric"></label>
-    <label class="field human-field"><span>Edad</span><input name="edad" type="number" min="0"></label>
-    <label class="field human-field"><span>Género</span><select name="genero"><option value="">Sin especificar</option><option value="F">F</option><option value="M">M</option></select></label>
-    <label class="field human-field"><span>Dirección</span><input name="direccion"></label>
-    <label class="field legal-field" hidden><span>Razón social</span><input name="razonSocial"></label>
-    <label class="field legal-field" hidden><span>CUIT</span><input name="cuit"></label>
-    <label class="field legal-field" hidden><span>Rubro</span><input name="rubro"></label>
-    <p id="donor-error" class="notice notice-error form-full" role="alert" hidden></p>
+  <form id="donor-form" class="form-grid" method="post" action="/administracion/donantes">
+    <label class="field"><span>Tipo de persona</span><select name="tipo"><option value="HUMANA">Persona humana</option><option value="JURIDICA" {{selectedIf "JURIDICA" values.donor.tipo}}>Persona jurídica</option></select></label>
+    <label class="field"><span>Correo de contacto</span><input name="email" type="email" required value="{{values.donor.email}}"></label>
+    <label class="field human-field"><span>Nombre</span><input name="nombre" value="{{values.donor.nombre}}"></label>
+    <label class="field human-field"><span>Apellido</span><input name="apellido" value="{{values.donor.apellido}}"></label>
+    <label class="field human-field"><span>DNI</span><input name="dni" inputmode="numeric" value="{{values.donor.dni}}"></label>
+    <label class="field human-field"><span>Edad</span><input name="edad" type="number" min="0" value="{{values.donor.edad}}"></label>
+    <label class="field human-field"><span>Género</span><select name="genero"><option value="">Sin especificar</option><option value="F" {{selectedIf "F" values.donor.genero}}>F</option><option value="M" {{selectedIf "M" values.donor.genero}}>M</option></select></label>
+    <label class="field human-field"><span>Dirección</span><input name="direccion" value="{{values.donor.direccion}}"></label>
+    <label class="field legal-field" hidden><span>Razón social</span><input name="razonSocial" value="{{values.donor.razonSocial}}"></label>
+    <label class="field legal-field" hidden><span>CUIT</span><input name="cuit" value="{{values.donor.cuit}}"></label>
+    <label class="field legal-field" hidden><span>Rubro</span><input name="rubro" value="{{values.donor.rubro}}"></label>
+    <p id="donor-error" class="notice notice-error form-full" role="alert" {{#unless formErrors.donor}}hidden{{/unless}}>{{formErrors.donor}}</p>
     <div class="form-full"><button class="button button-primary" type="submit">Registrar donante</button></div>
   </form>
   {{else}}<p class="notice notice-info">Esta acción requiere una sesión con perfil de administración.</p>{{/if}}

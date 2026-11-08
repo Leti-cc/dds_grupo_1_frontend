@@ -2,8 +2,8 @@
   <div><p class="eyebrow">Seguimiento público</p><h1>¿Dónde está tu entrega?</h1><p class="lead">Ingresá el identificador de logística para consultar su estado y recorrido.</p></div>
 </section>
 <section class="surface-card tracking-search">
-  <form id="tracking-form" class="inline-form">
-    <label class="field grow"><span>Identificador de entrega</span><input name="deliveryId" value="{{queryId}}" placeholder="Ej.: 6727a1f0c2b1e45a9d3f0a11" required autocomplete="off"></label>
+  <form id="tracking-form" class="inline-form" method="get" action="/seguimiento">
+    <label class="field grow"><span>Identificador de entrega</span><input name="id" value="{{queryId}}" placeholder="Ej.: 6727a1f0c2b1e45a9d3f0a11" required autocomplete="off"></label>
     <button class="button button-primary" type="submit">Consultar entrega</button>
   </form>
   <p class="field-hint">Podés copiar el identificador que figura en el comprobante de la donación.</p>
