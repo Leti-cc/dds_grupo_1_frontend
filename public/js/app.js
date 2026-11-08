@@ -72,7 +72,14 @@ function setBusy(form) {
     return;
   }
   button.dataset.originalText = button.textContent;
-  button.textContent = BUSY_TEXT_BY_FORM[form.id] ?? "Guardando...";
+  button.textContent =
+    button.dataset.busyText ?? BUSY_TEXT_BY_FORM[form.id] ?? "Guardando...";
+  if (button.dataset.busyText) {
+    const spinner = document.createElement("span");
+    spinner.className = "button-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+    button.prepend(spinner);
+  }
   button.disabled = true;
   button.setAttribute("aria-busy", "true");
 }

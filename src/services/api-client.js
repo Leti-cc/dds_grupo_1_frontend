@@ -1,11 +1,13 @@
 import { API_TIMEOUT_MS, API_URLS } from "../config.js";
 
 export class ApiError extends Error {
-  constructor(message, { status = 0, data = null } = {}) {
+  constructor(message, { status = 0, data = null, mensajeUsuario = message } = {}) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.data = data;
+    // Texto apto para mostrar en pantalla; message puede traer el detalle técnico del backend.
+    this.mensajeUsuario = mensajeUsuario;
   }
 }
 
@@ -71,6 +73,7 @@ export async function apiRequest(
   }
 
   let response;
+  let responseText;
   try {
     response = await fetch(url, {
       method,
@@ -79,6 +82,8 @@ export async function apiRequest(
       ...(form !== undefined ? { body: form } : {}),
       signal: AbortSignal.timeout(timeoutMs),
     });
+    // Dentro del try: el timeout también puede vencer mientras se lee el cuerpo.
+    responseText = await response.text();
   } catch (error) {
     const timedOut = error.name === "TimeoutError" || error.name === "AbortError";
     console.error(`[api] ${method} ${url} falló: ${error.cause?.code ?? error.name} ${error.message}`);
@@ -90,10 +95,7 @@ export async function apiRequest(
     );
   }
 
-  const data = parseResponseBody(
-    await response.text(),
-    response.headers.get("content-type") ?? "",
-  );
+  const data = parseResponseBody(responseText, response.headers.get("content-type") ?? "");
   if (!response.ok) {
     console.error(
       `[api] ${method} ${url} respondió ${response.status}:`,

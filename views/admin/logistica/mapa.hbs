@@ -1,0 +1,36 @@
+<div class="logistica" data-mapa data-polling-ms="{{pollingMs}}">
+  <section class="page-heading dashboard-heading">
+    <div><p class="eyebrow">Administración · Logística</p><h1>Mapa</h1><p class="lead">Seguí la ubicación de la flota en tiempo real.</p></div>
+    <p class="mapa-indicador" data-mapa-indicador>Actualizando…</p>
+  </section>
+
+  {{> logistica-tabs}}
+
+  <div class="notice notice-error banner-accion" data-mapa-banner role="status" hidden>
+    <span data-mapa-banner-texto></span>
+    <button class="button button-outline button-small" type="button" data-mapa-reintentar>Reintentar</button>
+  </div>
+
+  <div class="map-layout">
+    <div class="mapa-marco">
+      <div class="mapa-canvas" id="mapa-camiones" role="region" aria-label="Mapa de camiones"></div>
+      <div class="mapa-cargando" data-mapa-cargando role="status"><span class="spinner" aria-hidden="true"></span><span>Cargando camiones…</span></div>
+    </div>
+
+    <section class="surface-card mapa-panel" aria-labelledby="mapa-lista-titulo">
+      <h2 id="mapa-lista-titulo">Camiones</h2>
+      <ul class="mapa-leyenda" aria-label="Referencias del mapa">
+        <li><span class="mapa-marker-ruta"><span class="mapa-glifo" aria-hidden="true">▶</span></span> En ruta</li>
+        <li><span class="mapa-marker-disponible"><span class="mapa-glifo" aria-hidden="true">✓</span></span> Disponible</li>
+      </ul>
+      <ul class="mapa-lista" data-mapa-lista aria-busy="true">
+        <li class="skeleton mapa-skeleton" data-mapa-skeleton aria-hidden="true"></li>
+        <li class="skeleton mapa-skeleton" data-mapa-skeleton aria-hidden="true"></li>
+        <li class="skeleton mapa-skeleton" data-mapa-skeleton aria-hidden="true"></li>
+      </ul>
+      <div class="empty-state compact" data-mapa-vacio hidden><strong>Todavía no hay camiones.</strong><a class="button button-outline button-small" href="/admin/logistica/camiones">Ir a Camiones</a></div>
+    </section>
+  </div>
+</div>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script type="module" src="/js/logistica/mapa.js"></script>

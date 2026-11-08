@@ -1,3 +1,6 @@
+import { ROLE_ALIASES, userHasRole } from "./auth.js";
+import { AUTH_DEV_BYPASS } from "../src/config.js";
+
 const NAVIGATION = [
   { path: "/", label: "Inicio" },
   { path: "/seguimiento", label: "Seguimiento" },
@@ -5,6 +8,13 @@ const NAVIGATION = [
   { path: "/entidad", label: "Entidad" },
   { path: "/administracion", label: "Administración" },
 ];
+
+// Solo para administración: se suma al menú según el rol de la sesión.
+const LOGISTICA_LINK = {
+  path: "/admin/logistica/camiones",
+  activePrefix: "/admin/logistica",
+  label: "Logística",
+};
 
 function userLabel(user) {
   return user?.nombre ?? user?.username ?? user?.email ?? "Sesión iniciada";
@@ -22,10 +32,12 @@ export function layoutLocals(req, res, next) {
   const user = req.session?.user ?? null;
   res.locals.user = user;
   res.locals.userLabel = userLabel(user);
-  res.locals.links = NAVIGATION.map((item) => ({
+  const canSeeLogistica = AUTH_DEV_BYPASS || userHasRole(user, ROLE_ALIASES.ADMIN);
+  const navigation = canSeeLogistica ? [...NAVIGATION, LOGISTICA_LINK] : NAVIGATION;
+  res.locals.links = navigation.map((item) => ({
     ...item,
     href: item.path,
-    active: isActive(item.path, req.path),
+    active: isActive(item.activePrefix ?? item.path, req.path),
   }));
   next();
 }

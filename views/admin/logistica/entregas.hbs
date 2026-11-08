@@ -1,0 +1,92 @@
+<div class="logistica">
+  <section class="page-heading">
+    <div><p class="eyebrow">Administración · Logística</p><h1>Entregas y rutas</h1><p class="lead">Planificá las entregas pendientes y poné en marcha las rutas.</p></div>
+  </section>
+
+  {{> logistica-tabs}}
+
+  {{#if servicioNoDisponible}}{{> logistica-no-disponible url="/admin/logistica/entregas"}}{{/if}}
+  {{#if (eq flash.form "planificacion")}}<p class="notice notice-info" role="status">{{flash.message}}</p>{{/if}}
+
+  {{#if demoTools}}
+  <section class="notice-demo banner-accion" aria-label="Herramienta de demostración">
+    <div><strong>Herramienta de demostración</strong><p>Reemplaza al optimizador externo, que no existe en este entorno: reparte las entregas pendientes entre los camiones disponibles.</p></div>
+    <form id="simular-form" method="post" action="/admin/logistica/entregas/simular">
+      <button class="button button-outline" type="submit" data-busy-text="Simulando…">Simular respuesta del optimizador</button>
+    </form>
+  </section>
+  {{/if}}
+
+  <section class="surface-card section-block" aria-labelledby="pendientes-titulo">
+    <div class="section-heading">
+      <div><h2 id="pendientes-titulo">Entregas pendientes</h2>{{#if entregasCargadas}}<p class="contador">{{contadorPendientes}}</p>{{/if}}</div>
+      <form id="planificar-form" method="post" action="/admin/logistica/entregas/planificar">
+        <span class="tooltip-wrap">
+          <button class="button button-primary" type="submit" aria-describedby="planificar-tip" data-busy-text="Enviando…">Planificar rutas</button>
+          <span class="tooltip tooltip-end" id="planificar-tip" role="tooltip">Envía las entregas pendientes y los camiones disponibles al optimizador. El horario programado es a las 00:00</span>
+        </span>
+      </form>
+    </div>
+    {{#if errorEntregas}}<p class="notice notice-error" role="alert">{{errorEntregas}}</p>{{/if}}
+    {{#if entregas.length}}
+    <div class="table-wrap table-wrap-visible">
+      <table class="table-cards" role="table" aria-labelledby="pendientes-titulo">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">Donación</th>
+            <th role="columnheader" scope="col">Dirección</th>
+            <th role="columnheader" scope="col">Fecha de creación</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {{#each entregas}}
+          <tr role="row">
+            <td role="cell" data-label="Donación"><strong>#{{donacionId}}</strong></td>
+            <td role="cell" data-label="Dirección">{{direccionDestino}}</td>
+            <td role="cell" data-label="Fecha de creación">{{fechaCreacionTexto}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{else if entregasCargadas}}
+    <div class="empty-state compact"><strong>No hay entregas pendientes.</strong><span>Se crean solas cuando se asigna una donación a una entidad.</span></div>
+    {{/if}}
+  </section>
+
+  <section class="section-block" aria-labelledby="rutas-titulo">
+    <div class="section-heading"><h2 id="rutas-titulo">Rutas activas</h2></div>
+    {{#if errorRutas}}<p class="notice notice-error" role="alert">{{errorRutas}}</p>{{/if}}
+    {{#if rutas.length}}
+    <div class="rutas-grid">
+      {{#each rutas}}
+      <article class="surface-card ruta-card">
+        <div class="section-heading">
+          <div><h3>Camión {{patenteCamion}}</h3><p class="contador">Planificada el {{fechaTexto}} · {{cantidadTexto}}</p></div>
+          <span class="tag {{#if iniciada}}tag-blue{{else}}tag-green{{/if}}">{{estadoTexto}}</span>
+        </div>
+        <ol class="ruta-entregas">
+          {{#each entregas}}
+          <li><span>{{direccionDestino}}</span><span class="tag tag-neutral">{{statusLabel estado}}</span></li>
+          {{/each}}
+        </ol>
+        {{#unless iniciada}}
+        <button class="button button-primary" type="button" data-dialog-open="iniciar-{{@index}}" aria-label="Iniciar ruta del camión {{patenteCamion}}">Iniciar ruta</button>
+        <dialog class="dialog" id="iniciar-{{@index}}" aria-labelledby="iniciar-titulo-{{@index}}" aria-describedby="iniciar-texto-{{@index}}">
+          <h2 id="iniciar-titulo-{{@index}}">Iniciar la ruta del camión {{patenteCamion}}</h2>
+          <p id="iniciar-texto-{{@index}}">{{confirmacionInicio}}</p>
+          <form class="dialog-actions" id="iniciar-form-{{@index}}" method="post" action="/admin/logistica/rutas/{{patenteUrl}}/iniciar">
+            <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+            <button class="button button-primary" type="submit" data-busy-text="Iniciando…">Iniciar ruta</button>
+          </form>
+        </dialog>
+        {{/unless}}
+      </article>
+      {{/each}}
+    </div>
+    {{else if rutasCargadas}}
+    <div class="surface-card"><div class="empty-state compact"><strong>No hay rutas activas.</strong><span>Tocá "Planificar rutas" y aparecerán acá cuando responda el optimizador.</span></div></div>
+    {{/if}}
+  </section>
+</div>
+<script type="module" src="/js/logistica/modales.js"></script>

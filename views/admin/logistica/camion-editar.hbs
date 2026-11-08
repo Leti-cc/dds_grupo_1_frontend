@@ -1,0 +1,22 @@
+<div class="logistica">
+  <section class="page-heading">
+    <div><p class="eyebrow">Logística · Camiones</p><h1>Editar camión {{patente}}</h1><p class="lead">Actualizá la capacidad y las medidas del camión.</p></div>
+  </section>
+
+  {{#if servicioNoDisponible}}{{> logistica-no-disponible url=urlReintento}}{{/if}}
+  {{#if errorCarga}}<p class="notice notice-error" role="alert">{{errorCarga}}</p>{{/if}}
+
+  {{#if mostrarFormulario}}
+  <section class="surface-card form-angosto">
+    <form class="form-stack" id="editar-camion-form" method="post" action="/admin/logistica/camiones/{{patenteUrl}}/editar">
+      {{> logistica-camion-campos prefijo="editar" soloLectura=true}}
+      <div class="dialog-actions">
+        <a class="button button-outline" href="/admin/logistica/camiones">Cancelar</a>
+        <button class="button button-primary" type="submit" data-busy-text="Guardando…">Guardar cambios</button>
+      </div>
+    </form>
+  </section>
+  {{else}}
+  <p><a class="button button-outline" href="/admin/logistica/camiones">Volver a Camiones</a></p>
+  {{/if}}
+</div>
