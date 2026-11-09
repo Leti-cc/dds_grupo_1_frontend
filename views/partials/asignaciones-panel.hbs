@@ -1,0 +1,82 @@
+{{!--
+  Ranking de la donación elegida (?donacion=128), como modal. El servidor lo renderiza y modales.js lo abre
+  con data-dialog-abierto. Al cerrarlo, asignaciones/ranking.js saca ?donacion de la URL sin recargar.
+  El diálogo de vencida es hermano (no hijo) para poder abrirlo solo, desde "Marcar vencida" en la fila (F3).
+--}}
+<dialog class="dialog dialog-ranking" id="ranking-dialog" aria-labelledby="ranking-dialog-titulo" data-url-cerrar="{{panel.urlCerrar}}"{{#if panel.abrirRanking}} data-dialog-abierto{{/if}}>
+  {{#if panel.sinDatos}}
+  <div class="dialog-encabezado">
+    <h2 id="ranking-dialog-titulo">Donación #{{panel.id}}</h2>
+    <button class="button button-outline button-small" type="button" data-dialog-close aria-label="Cerrar el ranking">✕ Cerrar</button>
+  </div>
+  {{#if (eq @root.flash.form "ranking")}}<p class="notice notice-error" role="alert">{{@root.flash.message}}</p>{{/if}}
+  {{#if panel.error}}<p class="notice notice-error" role="alert">{{panel.error}}</p>{{/if}}
+  <p class="muted">No se pudo cargar el ranking de esta donación. La lista sigue disponible.</p>
+  {{else}}
+  <div class="dialog-encabezado">
+    <div><p class="eyebrow">Donación #{{panel.donacion.id}}</p><h2 id="ranking-dialog-titulo">{{panel.donacion.descripcion}}</h2></div>
+    <button class="button button-outline button-small" type="button" data-dialog-close aria-label="Cerrar el ranking">✕ Cerrar</button>
+  </div>
+  {{#if (eq @root.flash.form "ranking")}}<p class="notice notice-error" role="alert">{{@root.flash.message}}</p>{{/if}}
+
+  <dl class="panel-datos">
+    <div><dt>Subcategoría</dt><dd>{{panel.donacion.subcategoriaNombre}}</dd></div>
+    <div><dt>Cantidad</dt><dd>{{panel.donacion.cantidadTexto}}</dd></div>
+    <div><dt>Donante</dt><dd>{{panel.donacion.donanteNombre}}</dd></div>
+    <div><dt>Ingreso</dt><dd>{{panel.donacion.fechaIngresoTexto}}</dd></div>
+  </dl>
+
+  {{#if panel.donacion.items.length}}
+  <h3 class="panel-subtitulo">Ítems</h3>
+  {{> asignaciones-items items=panel.donacion.items}}
+  {{/if}}
+
+  <section class="panel-ranking" aria-labelledby="ranking-titulo">
+    <h3 class="panel-subtitulo" id="ranking-titulo">Entidades sugeridas</h3>
+    {{#if panel.ranking.pendiente}}
+    <p class="notice notice-info">{{panel.ranking.ayuda}} Mientras tanto se puede marcar como vencida, pero no asignar.</p>
+    {{else}}
+    <p class="muted">Ranking calculado el {{panel.ranking.fechaCalculoTexto}}.</p>
+    {{#if panel.ranking.sinCandidatos}}
+    <div class="empty-state compact"><strong>Ningún algoritmo encontró entidades para esta donación.</strong><span>Puede pasar si ninguna entidad tiene una necesidad activa compatible.</span></div>
+    {{else}}
+    {{#unless panel.ranking.tieneCoincidencias}}<p class="notice notice-info">Los algoritmos no coinciden: podés elegir de cualquiera de las dos listas.</p>{{/unless}}
+    <div class="ranking-columnas">
+      {{#each panel.ranking.listas}}
+      <section aria-labelledby="{{idTitulo}}">
+        <h4 id="{{idTitulo}}">{{titulo}}</h4>
+        {{#if candidatos.length}}
+        <ol class="candidatos">
+          {{#each candidatos}}{{> asignaciones-candidato}}{{/each}}
+        </ol>
+        {{else}}
+        <p class="muted">Este algoritmo no sugirió entidades.</p>
+        {{/if}}
+      </section>
+      {{/each}}
+    </div>
+    {{/if}}
+    {{/if}}
+  </section>
+
+  <div class="panel-acciones">
+    <button class="button button-outline" type="button" data-dialog-open="vencer-dialog">Marcar vencida</button>
+  </div>
+  {{/if}}
+</dialog>
+
+{{#unless panel.sinDatos}}
+<dialog class="dialog" id="vencer-dialog" aria-labelledby="vencer-titulo" aria-describedby="vencer-texto" data-url-cerrar="{{panel.urlCerrar}}"{{#if panel.abrirVencer}} data-dialog-abierto{{/if}}>
+  <h2 id="vencer-titulo">Marcar como vencida</h2>
+  <div id="vencer-texto">
+    <p>¿Marcar como vencida la donación #{{panel.donacion.id}} ({{panel.donacion.descripcion}})? Deja de estar disponible para asignar y no se puede deshacer.</p>
+    {{#if panel.donacion.avisoVencimiento}}<p class="notice notice-error"><span aria-hidden="true">⚠️ </span>{{panel.donacion.avisoVencimiento}}</p>{{/if}}
+  </div>
+  {{#if panel.donacion.items.length}}{{> asignaciones-items items=panel.donacion.items}}{{/if}}
+  <form class="dialog-actions" id="vencer-form" method="post" action="/admin/donaciones/{{panel.donacion.id}}/vencer">
+    <input type="hidden" name="volver" value="{{volver}}">
+    <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+    <button class="button button-danger" type="submit" data-busy-text="Marcando…">Marcar vencida</button>
+  </form>
+</dialog>
+{{/unless}}

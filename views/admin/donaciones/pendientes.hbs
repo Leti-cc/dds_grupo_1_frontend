@@ -1,0 +1,64 @@
+<div class="asignaciones">
+  <section class="page-heading">
+    <div><p class="eyebrow">Administración · Donaciones</p><h1>Asignación de donaciones</h1><p class="lead">Elegí a qué entidad conviene asignar cada donación que está en depósito.</p></div>
+  </section>
+
+  {{> donaciones-tabs}}
+
+  <aside class="hint" aria-label="Ayuda">
+    <p>Los rankings se calculan cada noche. Elegí una donación para ver a qué entidades conviene asignarla.</p>
+  </aside>
+
+  {{#if servicioNoDisponible}}{{> asignaciones-no-disponible url=urlReintento}}{{/if}}
+  {{#if errorLista}}<p class="notice notice-error" role="alert">{{errorLista}}</p>{{/if}}
+
+  <div class="asignaciones-layout">
+    <section class="surface-card asignaciones-lista" aria-labelledby="cola-titulo" data-carga>
+      <div class="section-heading">
+        <div><h2 id="cola-titulo">Donaciones en depósito</h2>{{#if listaCargada}}<p class="contador">{{totalTexto}}</p>{{/if}}</div>
+        {{#if subcategorias}}
+        <form class="filtros" method="get" action="/admin/donaciones/pendientes" aria-label="Filtrar donaciones pendientes">
+          <label class="field"><span>Subcategoría</span>
+            <select name="subcategoriaId">{{#each subcategorias}}<option value="{{valor}}"{{#if seleccionado}} selected{{/if}}>{{texto}}</option>{{/each}}</select>
+          </label>
+          <button class="button button-outline" type="submit">Filtrar</button>
+        </form>
+        {{/if}}
+      </div>
+
+      {{#if pendientes.length}}
+      <div class="table-wrap table-wrap-visible">
+        <table class="table-cards" role="table" aria-labelledby="cola-titulo">
+          <thead role="rowgroup">
+            <tr role="row">
+              <th role="columnheader" scope="col">Donación</th>
+              <th role="columnheader" scope="col">Cantidad</th>
+              <th role="columnheader" scope="col">Ingreso</th>
+              <th role="columnheader" scope="col">Ranking</th>
+              <th role="columnheader" scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup">
+            {{#each pendientes}}{{> asignaciones-fila}}{{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{> paginacion paginacion=paginacion}}
+      {{else if listaCargada}}
+        {{#if filtroActivo}}
+        <div class="empty-state compact"><strong>Ninguna donación de esta subcategoría está en depósito.</strong><a class="text-link" href="{{urlQuitarFiltro}}" data-quitar-filtro>Quitar filtro</a></div>
+        {{else}}
+        <div class="empty-state compact"><strong>No hay donaciones en depósito para asignar.</strong><span>Las donaciones nuevas aparecen acá cuando se registran en el depósito.</span></div>
+        {{/if}}
+      {{/if}}
+    </section>
+
+    {{#if panel}}{{> asignaciones-panel}}{{/if}}
+  </div>
+  {{> asignaciones-cargando}}
+</div>
+{{!-- Velo hasta que modales.js abre el modal, para que la lista no aparezca sola un instante. Es solo visual (pointer-events: none) y se desvanece solo si el JS no corre. --}}
+{{#if panel}}<div class="scrim-inicial" aria-hidden="true"></div>{{/if}}
+<script type="module" src="/js/logistica/modales.js"></script>
+<script type="module" src="/js/asignaciones/ranking.js"></script>
+<script type="module" src="/js/asignaciones/carga.js"></script>

@@ -1,0 +1,63 @@
+<div class="asignaciones">
+  <section class="page-heading">
+    <div><p class="eyebrow">Entidad</p><h1>Donaciones asignadas</h1><p class="lead">Seguí el estado de las donaciones que te asignaron.</p></div>
+  </section>
+
+  {{#if sinEntidad}}<p class="notice notice-info" role="status">{{sinEntidad}}</p>{{/if}}
+  {{#if servicioNoDisponible}}{{> asignaciones-no-disponible url=urlReintento}}{{/if}}
+  {{#if errorLista}}<p class="notice notice-error" role="alert">{{errorLista}}</p>{{/if}}
+
+  {{#unless sinEntidad}}
+  <section class="surface-card section-block" aria-labelledby="asignadas-titulo" data-carga>
+    <div class="section-heading">
+      <div><h2 id="asignadas-titulo">Tus donaciones</h2>{{#if listaCargada}}<p class="contador">{{totalTexto}}</p>{{/if}}</div>
+      <form class="filtros" method="get" action="/entidad/donaciones" aria-label="Filtrar donaciones asignadas">
+        {{#if conservarEntidad}}<input type="hidden" name="entidadId" value="{{conservarEntidad}}">{{/if}}
+        <label class="field"><span>Estado</span>
+          <select name="estado">{{#each estados}}<option value="{{valor}}"{{#if seleccionado}} selected{{/if}}>{{texto}}</option>{{/each}}</select>
+        </label>
+        <button class="button button-outline" type="submit">Filtrar</button>
+      </form>
+    </div>
+
+    {{#if donaciones.length}}
+    <div class="table-wrap table-wrap-visible">
+      <table class="table-cards" role="table" aria-labelledby="asignadas-titulo">
+        <thead role="rowgroup">
+          <tr role="row">
+            <th role="columnheader" scope="col">Donación</th>
+            <th role="columnheader" scope="col">Subcategoría</th>
+            <th role="columnheader" scope="col">Cantidad</th>
+            <th role="columnheader" scope="col">Donante</th>
+            <th role="columnheader" scope="col">Estado</th>
+            <th role="columnheader" scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody role="rowgroup">
+          {{#each donaciones}}
+          <tr role="row">
+            <td role="cell" data-label="Donación"><strong>{{descripcion}}</strong></td>
+            <td role="cell" data-label="Subcategoría">{{subcategoriaNombre}}</td>
+            <td role="cell" data-label="Cantidad">{{cantidadTexto}}</td>
+            <td role="cell" data-label="Donante">{{donanteNombre}}</td>
+            <td role="cell" data-label="Estado"><span class="tag {{estado.clase}}">{{estado.texto}}</span></td>
+            <td role="cell" data-label="Acciones">
+              <a class="button button-outline button-small" href="{{hrefDetalle}}" aria-label="Ver el detalle de la donación {{descripcion}}">Ver detalle</a>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{> paginacion paginacion=paginacion}}
+    {{else if listaCargada}}
+      {{#if filtroActivo}}
+      <div class="empty-state compact"><strong>No tenés donaciones en este estado.</strong><a class="text-link" href="{{urlQuitarFiltro}}" data-quitar-filtro>Quitar filtro</a></div>
+      {{else}}
+      <div class="empty-state compact"><strong>Todavía no te asignaron donaciones.</strong><span>Cuando la administración te asigne una, la vas a ver acá con su estado.</span></div>
+      {{/if}}
+    {{/if}}
+  </section>
+  {{/unless}}
+</div>
+<script type="module" src="/js/asignaciones/carga.js"></script>

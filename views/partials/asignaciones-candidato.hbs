@@ -1,0 +1,22 @@
+{{!-- Un candidato del ranking y su diálogo de confirmación. Usa @root para la donación del panel y la URL de vuelta. --}}
+<li class="candidato">
+  <span class="rank-number" aria-hidden="true">{{posicion}}</span>
+  <div>
+    <strong>{{entidadNombre}}</strong>
+    <small>{{direccion}}</small>
+  </div>
+  <button class="button button-primary button-small" type="button" data-dialog-open="{{dialogId}}" aria-label="Asignar a {{entidadNombre}}">Asignar</button>
+  <dialog class="dialog" id="{{dialogId}}" aria-labelledby="{{dialogId}}-titulo" aria-describedby="{{dialogId}}-texto">
+    <h2 id="{{dialogId}}-titulo">Confirmar asignación</h2>
+    <div id="{{dialogId}}-texto">
+      <p>{{confirmacion}}</p>
+      <p>Se le va a notificar a la entidad y se va a generar la entrega en logística. No se puede deshacer.</p>
+    </div>
+    <form class="dialog-actions" id="{{dialogId}}-form" method="post" action="/admin/donaciones/{{@root.panel.id}}/asignar">
+      <input type="hidden" name="entidadId" value="{{entidadId}}">
+      <input type="hidden" name="volver" value="{{@root.volver}}">
+      <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+      <button class="button button-primary" type="submit" data-busy-text="Asignando…">Asignar</button>
+    </form>
+  </dialog>
+</li>

@@ -16,6 +16,13 @@ const LOGISTICA_LINK = {
   label: "Logística",
 };
 
+// Flujo 5: también solo para administración, con la misma condición que Logística.
+const DONACIONES_LINK = {
+  path: "/admin/donaciones/pendientes",
+  activePrefix: "/admin/donaciones",
+  label: "Donaciones",
+};
+
 function userLabel(user) {
   return user?.nombre ?? user?.username ?? user?.email ?? "Sesión iniciada";
 }
@@ -33,7 +40,7 @@ export function layoutLocals(req, res, next) {
   res.locals.user = user;
   res.locals.userLabel = userLabel(user);
   const canSeeLogistica = AUTH_DEV_BYPASS || userHasRole(user, ROLE_ALIASES.ADMIN);
-  const navigation = canSeeLogistica ? [...NAVIGATION, LOGISTICA_LINK] : NAVIGATION;
+  const navigation = canSeeLogistica ? [...NAVIGATION, DONACIONES_LINK, LOGISTICA_LINK] : NAVIGATION;
   res.locals.links = navigation.map((item) => ({
     ...item,
     href: item.path,

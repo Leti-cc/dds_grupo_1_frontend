@@ -1,0 +1,30 @@
+<tr role="row"{{#if elegida}} class="is-selected" aria-current="true"{{/if}}>
+  <td role="cell" data-label="Donación">
+    <div class="celda">
+      <strong>#{{id}} · {{descripcion}}</strong>
+      <small>{{subcategoriaNombre}} · {{donanteNombre}}</small>
+      {{#if sugerencia}}<small>Sugerida: {{sugerencia}}</small>{{/if}}
+    </div>
+  </td>
+  <td role="cell" data-label="Cantidad">{{cantidadTexto}}</td>
+  <td role="cell" data-label="Ingreso">{{fechaIngresoTexto}}</td>
+  <td role="cell" data-label="Ranking">
+    {{#if ayudaPendiente}}
+    <span class="tooltip-wrap">
+      <span class="tag {{chip.clase}}">{{chip.texto}}</span>
+      <button class="tooltip-trigger" type="button" aria-label="Por qué el ranking está pendiente" aria-describedby="pendiente-tip-{{id}}">ⓘ</button>
+      <span class="tooltip tooltip-end" id="pendiente-tip-{{id}}" role="tooltip">{{ayudaPendiente}}</span>
+    </span>
+    {{else}}
+    <span class="tag {{chip.clase}}">{{chip.texto}}</span>
+    {{/if}}
+  </td>
+  <td role="cell" data-label="Acciones">
+    <div class="table-actions">
+      {{#if rankingCalculado}}
+      <a class="button button-outline button-small" href="{{hrefRanking}}" data-abre-modal="ranking"{{#if elegida}}{{#unless @root.panel.abrirVencer}} data-foco-al-cerrar{{/unless}}{{/if}} aria-label="Ver el ranking de la donación #{{id}}">Ver ranking</a>
+      {{/if}}
+      <a class="button button-outline button-small" href="{{hrefVencer}}" data-abre-modal="vencer"{{#if elegida}}{{#if @root.panel.abrirVencer}} data-foco-al-cerrar{{/if}}{{/if}} aria-label="Marcar como vencida la donación #{{id}}">Marcar vencida</a>
+    </div>
+  </td>
+</tr>
