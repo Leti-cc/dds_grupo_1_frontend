@@ -1,0 +1,16 @@
+{{!-- Paginado genérico. Recibe paginacion = { texto, anterior, siguiente } (ver vistaPaginacion en src/lib/asignaciones-vista.js). --}}
+{{#if paginacion}}
+<nav class="paginacion" aria-label="Paginación">
+  {{#if paginacion.anterior}}
+  <a class="button button-outline button-small" href="{{paginacion.anterior}}" rel="prev">‹ Anterior</a>
+  {{else}}
+  <span class="button button-outline button-small" aria-disabled="true">‹ Anterior</span>
+  {{/if}}
+  <span aria-current="page">{{paginacion.texto}}</span>
+  {{#if paginacion.siguiente}}
+  <a class="button button-outline button-small" href="{{paginacion.siguiente}}" rel="next">Siguiente ›</a>
+  {{else}}
+  <span class="button button-outline button-small" aria-disabled="true">Siguiente ›</span>
+  {{/if}}
+</nav>
+{{/if}}

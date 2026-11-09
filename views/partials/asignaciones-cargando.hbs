@@ -1,0 +1,27 @@
+{{!--
+  Skeleton del modal. ranking.js lo abre apenas se toca "Ver ranking" o "Marcar vencida" en una fila,
+  mientras el servidor arma la página con el modal real. data-variante (ranking | vencer) elige la forma.
+--}}
+<dialog class="dialog dialog-ranking dialog-cargando" id="ranking-cargando" aria-labelledby="ranking-cargando-titulo" aria-busy="true">
+  <h2 class="visually-hidden" id="ranking-cargando-titulo">Cargando la donación…</h2>
+  <div aria-hidden="true">
+    <div class="solo-ranking">
+      <div class="skeleton sk-linea sk-eyebrow"></div>
+      <div class="skeleton sk-titulo"></div>
+      <div class="sk-grilla">
+        <div class="skeleton sk-linea"></div><div class="skeleton sk-linea"></div>
+        <div class="skeleton sk-linea"></div><div class="skeleton sk-linea"></div>
+      </div>
+      <div class="skeleton sk-linea sk-subtitulo"></div>
+      <div class="sk-candidato"><div class="skeleton sk-circulo"></div><div class="skeleton sk-linea"></div><div class="skeleton sk-boton"></div></div>
+      <div class="sk-candidato"><div class="skeleton sk-circulo"></div><div class="skeleton sk-linea"></div><div class="skeleton sk-boton"></div></div>
+      <div class="sk-candidato"><div class="skeleton sk-circulo"></div><div class="skeleton sk-linea"></div><div class="skeleton sk-boton"></div></div>
+    </div>
+    <div class="solo-vencer">
+      <div class="skeleton sk-titulo"></div>
+      <div class="skeleton sk-linea"></div>
+      <div class="skeleton sk-linea sk-corta"></div>
+      <div class="sk-acciones"><div class="skeleton sk-boton"></div><div class="skeleton sk-boton"></div></div>
+    </div>
+  </div>
+</dialog>

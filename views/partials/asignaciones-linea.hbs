@@ -1,0 +1,9 @@
+{{!-- Línea de tiempo de estados. Recibe pasos = pasosLinea(...) (src/lib/asignaciones-vista.js). La usan el detalle del admin y el de la entidad. --}}
+<ol class="timeline-list linea-estados">
+  {{#each pasos}}
+  <li class="paso-{{situacion}}{{#if fallido}} paso-fallido{{/if}}"{{#if (eq situacion "actual")}} aria-current="step"{{/if}}>
+    <span class="timeline-dot" aria-hidden="true"></span>
+    <div><strong>{{texto}}</strong><span class="visually-hidden"> ({{descripcion}})</span></div>
+  </li>
+  {{/each}}
+</ol>

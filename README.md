@@ -41,7 +41,7 @@ No se incorporaron funcionalidades de la entrega 7.
 | `routes/` | Un router por pantalla. Cada ruta consulta las APIs y hace `res.render(...)`. |
 | `middleware/` | `auth.js` (`requireRole(...)` provisorio), `flash.js` (mensajes para toasts) y `locals.js` (datos del layout). |
 | `src/services/` | Clientes HTTP de las APIs. Corren en el servidor y toman el token de `req.session`. |
-| `src/lib/` | Lógica pura y testeable: datos de cada página y, en `logistica-*.js`, formatos, validación, simulador y modelos de vista. |
+| `src/lib/` | Lógica pura y testeable: datos de cada página; en `logistica-*.js`, formatos, validación, simulador y modelos de vista; en `asignaciones-*.js`, validación y modelos de vista del flujo 5. |
 | `src/helpers/handlebars.js` | Helpers de las vistas: `statusLabel`, `eq` y `selectedIf`. |
 | `views/` | Plantillas `.hbs`; `views/layouts/main.hbs` es el layout común y `views/partials/` los parciales. |
 | `public/` | Archivos estáticos: `css/styles.css`, `js/app.js` (solo interacción: toast, toggles, campos condicionales, ver contraseña, estado de carga y barra de progreso) y `js/logistica/` (modales, ayuda inicial, mapa y su polling). |
@@ -133,6 +133,42 @@ HTTP en pantalla y deja el detalle en la consola del servidor.
 ```powershell
 npm test
 ```
+
+### Flujo 5: Asignación
+
+Sección del panel de administración, en `/admin/donaciones`, con dos pestañas, y
+una sección propia de la entidad beneficiaria en `/entidad/donaciones`:
+
+| Página | Ruta | Contenido |
+|---|---|---|
+| Pendientes de asignación | `/admin/donaciones/pendientes` | Cola paginada de las donaciones en depósito con su ranking. **Ver ranking** (`?donacion=128`) abre un modal con los datos de la donación, las entidades sugeridas, **Asignar** y **Marcar vencida**. |
+| Todas las donaciones | `/admin/donaciones/todas` | Consulta de solo lectura, en cualquier estado, filtrable por estado y subcategoría. |
+| Detalle | `/admin/donaciones/:id` | Datos, ítems, foto de la entrega y línea de tiempo de estados. |
+| Donaciones asignadas | `/entidad/donaciones` | Las donaciones asignadas a la entidad de la sesión, con su estado, y su detalle en `/entidad/donaciones/:id`. |
+
+Requiere una sesión con rol de administración o de entidad. Mientras no exista el
+servicio de autenticación, usar `AUTH_DEV_BYPASS=true`: con el bypass, la vista de
+la entidad acepta `?entidadId=4` en la URL (sin el bypass, el id sale solo de la
+sesión y la entidad no puede ver donaciones de otra).
+
+El ranking se calcula de noche y el front no tiene un botón para recalcularlo.
+Para la demo se dispara a mano con `POST /api/asignaciones/ejecuciones`.
+
+Limitaciones actuales, documentadas en `docs/coordinacion-flujo-5.md`:
+
+- "Todas las donaciones" usa `GET /api/donaciones`, que no pagina: muestra la lista completa.
+- La línea de tiempo no tiene fechas, porque `DonacionDTO` todavía no trae el historial de estados.
+
+#### Guion de demo
+
+Preparación: `servicio-donaciones` levantado (rama `Franco/Asignacion`), con donaciones en depósito y entidades con necesidades activas.
+
+1. Calcular los rankings con Postman: `POST {DONACIONES_API_URL}/api/asignaciones/ejecuciones`.
+2. Ir a **Donaciones → Pendientes de asignación**, tocar **Ver ranking** en una donación y **Asignar** a una entidad del ranking. Confirmar en el diálogo.
+3. En **Todas las donaciones**, filtrar por "Asignada" y ver la donación con su entidad.
+4. En **Logística → Entregas y rutas**, ver la entrega nueva que generó la asignación.
+5. Abrir `/entidad/donaciones?entidadId=<id de la entidad>` y ver la donación desde la entidad, con su línea de tiempo.
+6. Desde la fila de otra donación, tocar **Marcar vencida**: el panel se abre con el diálogo y avisa si la fecha cargada todavía no venció.
 
 ### Flujo 6: Logística
 

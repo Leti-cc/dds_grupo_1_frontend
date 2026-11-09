@@ -1,0 +1,9 @@
+{{!-- Ítems de una donación con su vencimiento. Recibe items = vistaDonacion(...).items. --}}
+<ul class="data-list items-donacion">
+  {{#each items}}
+  <li>
+    <div><strong>{{nombre}}</strong>{{#if cantidadTexto}}<small>{{cantidadTexto}}</small>{{/if}}</div>
+    {{#if vencido}}<span class="tag tag-red">Venció el {{vencimientoTexto}}</span>{{else}}<span class="muted">Vence: {{vencimientoTexto}}</span>{{/if}}
+  </li>
+  {{/each}}
+</ul>

@@ -9,7 +9,9 @@ import { flash } from "./middleware/flash.js";
 import { requireRole } from "./middleware/auth.js";
 import { layoutLocals } from "./middleware/locals.js";
 import adminRoutes from "./routes/admin.js";
+import asignacionesRoutes from "./routes/asignaciones.js";
 import authRoutes from "./routes/auth.js";
+import donacionesEntidadRoutes from "./routes/donaciones-entidad.js";
 import donorRoutes from "./routes/donor.js";
 import entityRoutes from "./routes/entity.js";
 import logisticaRoutes from "./routes/logistica.js";
@@ -65,6 +67,8 @@ app.use(donorRoutes);
 app.use(entityRoutes);
 app.use(adminRoutes);
 app.use("/admin/logistica", requireRole("ADMIN"), logisticaRoutes);
+app.use("/admin/donaciones", requireRole("ADMIN"), asignacionesRoutes);
+app.use("/entidad/donaciones", requireRole("ENTIDAD"), donacionesEntidadRoutes);
 
 // Igual que la SPA: una ruta desconocida vuelve al inicio.
 app.use((req, res) => {

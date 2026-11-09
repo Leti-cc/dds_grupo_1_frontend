@@ -2348,3 +2348,567 @@ td small {
     animation: none;
   }
 }
+
+/* ---------- Flujo 5: Asignación de donaciones (solo dentro de .asignaciones y sus partials) ---------- */
+.asignaciones .tag,
+.asignaciones .eyebrow,
+.asignaciones th,
+.asignaciones td {
+  font-size: 12px;
+}
+
+.asignaciones .tag {
+  white-space: nowrap;
+}
+
+.asignaciones th {
+  color: var(--ink-muted);
+  white-space: normal;
+}
+
+.asignaciones .contador {
+  margin: 4px 0 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.asignaciones .section-heading {
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.asignaciones .section-heading h2,
+.asignaciones .section-heading h3 {
+  margin: 0;
+}
+
+.asignaciones .hint {
+  padding: 12px 16px;
+}
+
+.asignaciones .tooltip-wrap {
+  align-items: center;
+}
+
+.asignaciones .table-actions .button {
+  white-space: nowrap;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.filtros .field {
+  min-width: 180px;
+}
+
+.celda {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.celda small {
+  margin: 0;
+  color: var(--muted);
+}
+
+.asignaciones tr.is-selected {
+  background: var(--surface-selected);
+}
+
+.asignaciones tr.is-selected td:first-child {
+  box-shadow: inset 4px 0 0 var(--primary);
+}
+
+.asignaciones-layout {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.dialog-ranking {
+  width: min(760px, calc(100vw - 32px));
+}
+
+.dialog-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dialog-encabezado .eyebrow {
+  margin-bottom: 4px;
+}
+
+.dialog-ranking h2 {
+  margin: 0;
+}
+
+.dialog-ranking h4 {
+  margin: 16px 0 4px;
+  font-size: 14px;
+}
+
+.dialog .items-donacion {
+  margin-bottom: 4px;
+}
+
+.panel-datos,
+.datos-lista {
+  display: grid;
+  gap: 12px 16px;
+  margin: 16px 0;
+}
+
+.panel-datos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel-datos dt,
+.datos-lista dt {
+  margin-bottom: 4px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.panel-datos dd,
+.datos-lista dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.panel-subtitulo {
+  margin: 20px 0 4px;
+  font-size: 15px;
+}
+
+.items-donacion li {
+  min-height: 48px;
+}
+
+.ranking-columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 0 20px;
+}
+
+.candidatos {
+  display: grid;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.candidato {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #edf0f7;
+}
+
+.candidato:last-child {
+  border-bottom: 0;
+}
+
+.candidato strong {
+  font-size: 14px;
+}
+
+.candidato small {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-top: 2px;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.panel-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 20px;
+  border-top: 1px solid #edf0f7;
+}
+
+.paginacion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.paginacion [aria-disabled="true"] {
+  opacity: 0.45;
+}
+
+.detalle-donacion {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 1fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.detalle-donacion h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.foto-entrega {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.linea-estados {
+  margin-top: 16px;
+}
+
+.linea-estados li {
+  min-height: 56px;
+}
+
+.linea-estados .paso-pendiente .timeline-dot {
+  background: var(--surface-raised);
+  box-shadow: 0 0 0 2px var(--outline);
+}
+
+.linea-estados .paso-pendiente strong {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.linea-estados .paso-actual .timeline-dot {
+  box-shadow: 0 0 0 4px #bfdbfe;
+}
+
+.linea-estados .paso-fallido .timeline-dot {
+  background: var(--red);
+  box-shadow: 0 0 0 4px var(--red-soft);
+}
+
+.linea-estados .paso-fallido strong {
+  color: var(--red);
+}
+
+@media (max-width: 1000px) {
+  .detalle-donacion {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .filtros,
+  .filtros .field {
+    width: 100%;
+  }
+
+  .filtros .field {
+    min-width: 0;
+  }
+
+  .asignaciones .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .asignaciones .table-cards td .celda {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  /* El texto "Página X de Y" arriba y los dos botones abajo, para que entren en 360 px. */
+  .paginacion > [aria-current] {
+    flex-basis: 100%;
+    order: -1;
+    text-align: center;
+  }
+
+  .panel-datos {
+    grid-template-columns: 1fr;
+  }
+
+  .paginacion {
+    justify-content: space-between;
+  }
+}
+
+/* ---------- Flujo 5: animaciones y estados de carga ----------
+   Cortas (menos de 300 ms) y solo de opacidad y desplazamiento. Con "reducir movimiento" las apaga
+   la regla global de prefers-reduced-motion, y los skeleton dejan de pulsar (.skeleton, flujo 6). */
+
+@keyframes asignaciones-subir {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes asignaciones-aparecer {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes asignaciones-modal {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes asignaciones-desvanecer {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Entrada de la página: las tarjetas suben un poco y las filas aparecen en cascada. */
+.asignaciones .surface-card,
+.asignaciones .notice,
+.asignaciones .hint {
+  animation: asignaciones-subir 240ms ease-out both;
+}
+
+.detalle-donacion > .surface-card:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.asignaciones tbody tr,
+.linea-estados li {
+  animation: asignaciones-aparecer 260ms ease-out both;
+}
+
+.asignaciones tbody tr:nth-child(2),
+.linea-estados li:nth-child(2) {
+  animation-delay: 30ms;
+}
+
+.asignaciones tbody tr:nth-child(3),
+.linea-estados li:nth-child(3) {
+  animation-delay: 60ms;
+}
+
+.asignaciones tbody tr:nth-child(4),
+.linea-estados li:nth-child(4) {
+  animation-delay: 90ms;
+}
+
+.asignaciones tbody tr:nth-child(5),
+.linea-estados li:nth-child(5) {
+  animation-delay: 120ms;
+}
+
+.asignaciones tbody tr:nth-child(6) {
+  animation-delay: 150ms;
+}
+
+.asignaciones tbody tr:nth-child(n + 7) {
+  animation-delay: 180ms;
+}
+
+/* Diálogos abiertos con un clic: pequeño zoom y el fondo se oscurece de a poco. */
+.asignaciones dialog[open]:not([data-dialog-abierto]) {
+  animation: asignaciones-modal 180ms ease-out;
+}
+
+.asignaciones dialog[open]:not([data-dialog-abierto])::backdrop {
+  animation: asignaciones-aparecer 180ms ease-out;
+}
+
+/* Modal que abre la página al cargar: ocupa el lugar del skeleton, así que no hace zoom; solo aparece el contenido. */
+.asignaciones dialog[data-dialog-abierto][open] > * {
+  animation: asignaciones-aparecer 220ms ease-out both;
+}
+
+.candidato {
+  animation: asignaciones-subir 220ms ease-out both;
+}
+
+.candidato:nth-child(2) {
+  animation-delay: 40ms;
+}
+
+.candidato:nth-child(n + 3) {
+  animation-delay: 80ms;
+}
+
+/* Velo que deja el servidor hasta que se abre el modal. Solo visual; si el JS no corre, se va solo. */
+.scrim-inicial {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  background: var(--scrim);
+  pointer-events: none;
+  animation: asignaciones-desvanecer 200ms ease 2.5s forwards;
+}
+
+/* Skeleton del modal (asignaciones-cargando.hbs). */
+.dialog-cargando .skeleton {
+  margin-bottom: 10px;
+}
+
+.dialog-cargando .solo-vencer,
+.dialog-cargando[data-variante="vencer"] .solo-ranking {
+  display: none;
+}
+
+.dialog-cargando[data-variante="vencer"] {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.dialog-cargando[data-variante="vencer"] .solo-vencer {
+  display: block;
+}
+
+.sk-linea {
+  height: 12px;
+}
+
+.sk-eyebrow {
+  width: 22%;
+  height: 10px;
+}
+
+.sk-titulo {
+  width: 55%;
+  height: 24px;
+}
+
+.dialog-cargando .sk-titulo {
+  margin-bottom: 18px;
+}
+
+.sk-corta {
+  width: 60%;
+}
+
+.sk-subtitulo {
+  width: 35%;
+  margin-top: 22px;
+}
+
+.sk-grilla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+  margin-bottom: 8px;
+}
+
+.sk-grilla .sk-linea {
+  width: 70%;
+}
+
+.sk-candidato {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 88px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.sk-candidato .skeleton {
+  margin: 0;
+}
+
+.sk-circulo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.sk-boton {
+  height: 48px;
+  border-radius: var(--radius-md);
+}
+
+.sk-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.sk-acciones .sk-boton {
+  width: 110px;
+  margin: 0;
+}
+
+/* Skeleton de la tabla mientras llega la página siguiente (carga.js). */
+.cargando tbody tr {
+  animation: none;
+}
+
+.cargando tbody td {
+  position: relative;
+  color: transparent;
+}
+
+.cargando tbody td > * {
+  visibility: hidden;
+}
+
+.cargando tbody td::after {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: min(70%, 140px);
+  height: 12px;
+  margin-top: -6px;
+  background: var(--surface-selected);
+  border-radius: var(--radius-sm);
+  animation: skeleton-pulso 1.1s ease-in-out infinite alternate;
+  content: "";
+}
+
+.cargando .paginacion,
+.cargando .empty-state {
+  opacity: 0.5;
+  transition: opacity 150ms ease;
+}
+
+@media (max-width: 760px) {
+  /* En tarjetas, el skeleton va del lado del valor; la etiqueta (::before) queda visible. */
+  .cargando tbody td::after {
+    right: 0;
+    left: auto;
+    width: 45%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cargando tbody td::after {
+    animation: none;
+  }
+}
