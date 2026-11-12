@@ -1,0 +1,11 @@
+{{!--
+  Campo de texto con etiqueta, ayuda y error. Parámetros (hash):
+  id, name, label, value, error, type (text por defecto), required, maxlength, hint, placeholder,
+  autocomplete, inputmode, min, max, step, class.
+--}}
+<div class="field{{#if class}} {{class}}{{/if}}{{#if error}} tiene-error{{/if}}">
+  <label for="{{id}}">{{label}}{{#if required}} <span class="obligatorio" aria-hidden="true">*</span>{{/if}}</label>
+  <input id="{{id}}" name="{{name}}" type="{{#if type}}{{type}}{{else}}text{{/if}}" value="{{value}}"{{#if required}} required{{/if}}{{#if maxlength}} maxlength="{{maxlength}}"{{/if}}{{#if placeholder}} placeholder="{{placeholder}}"{{/if}}{{#if autocomplete}} autocomplete="{{autocomplete}}"{{/if}}{{#if inputmode}} inputmode="{{inputmode}}"{{/if}}{{#if min}} min="{{min}}"{{/if}}{{#if max}} max="{{max}}"{{/if}}{{#if step}} step="{{step}}"{{/if}}{{#if error}} aria-invalid="true"{{/if}}{{#if hint}} aria-describedby="{{id}}-ayuda{{#if error}} {{id}}-error{{/if}}"{{else if error}} aria-describedby="{{id}}-error"{{/if}}>
+  {{#if hint}}<p class="field-hint" id="{{id}}-ayuda">{{hint}}</p>{{/if}}
+  {{#if error}}<p class="field-error" id="{{id}}-error">{{error}}</p>{{/if}}
+</div>

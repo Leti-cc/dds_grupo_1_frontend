@@ -1,0 +1,52 @@
+<link rel="stylesheet" href="/css/ingreso.css">
+<div class="asignaciones ingreso">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Administración · Donaciones</p>
+      <h1>Registrar donante</h1>
+      <p class="lead">Completá los datos de quien dona. Después de guardar, seguís con la carga de su donación.</p>
+    </div>
+  </section>
+
+  {{> donaciones-tabs}}
+  {{> ingreso-pasos}}
+
+  <section class="surface-card section-block" aria-labelledby="alta-titulo">
+    <div class="section-heading">
+      <div><h2 id="alta-titulo">Paso 1 · Datos del donante</h2><p class="section-description">Los campos con <span class="obligatorio" aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.</p></div>
+      <a class="button button-outline button-small" href="{{urlVolver}}">← Volver a la búsqueda</a>
+    </div>
+
+    <nav class="segmentado" aria-label="Tipo de donante">
+      <a class="segmentado-opcion{{#if esHumana}} is-active{{/if}}" href="{{urlHumana}}"{{#if esHumana}} aria-current="page"{{/if}}>Persona humana</a>
+      <a class="segmentado-opcion{{#if esJuridica}} is-active{{/if}}" href="{{urlJuridica}}"{{#if esJuridica}} aria-current="page"{{/if}}>Persona jurídica</a>
+    </nav>
+
+    {{> ingreso-errores}}
+    {{#if errorGeneral}}<p class="notice notice-error" role="alert">{{errorGeneral}}</p>{{/if}}
+
+    <form id="alta-donante-form" class="form-grid ingreso-form" method="post" action="/admin/donaciones/nueva/donante">
+      <input type="hidden" name="tipo" value="{{#if esJuridica}}JURIDICA{{else}}HUMANA{{/if}}">
+      {{#if esHumana}}
+        {{> ingreso-campo id="nombre" name="nombre" label="Nombre" value=valores.nombre error=errores.nombre required=true maxlength=60 autocomplete="off"}}
+        {{> ingreso-campo id="apellido" name="apellido" label="Apellido" value=valores.apellido error=errores.apellido required=true maxlength=60 autocomplete="off"}}
+        {{> ingreso-campo id="dni" name="dni" label="DNI" value=valores.dni error=errores.dni required=true maxlength=12 inputmode="numeric" placeholder="Solo números" autocomplete="off"}}
+        {{> ingreso-campo id="edad" name="edad" label="Edad" value=valores.edad error=errores.edad required=true type="number" min="1" max="120" inputmode="numeric"}}
+        {{> ingreso-select id="genero" name="genero" label="Género" options=generos error=errores.genero}}
+        {{> ingreso-campo id="direccion" name="direccion" label="Dirección" value=valores.direccion error=errores.direccion required=true maxlength=150 placeholder="Calle, número y localidad" autocomplete="off" class="form-full"}}
+      {{else}}
+        {{> ingreso-campo id="razonSocial" name="razonSocial" label="Razón social" value=valores.razonSocial error=errores.razonSocial required=true maxlength=100 autocomplete="off"}}
+        {{> ingreso-select id="tipoPersonaJuridica" name="tipoPersonaJuridica" label="Tipo de organización" options=tiposJuridica error=errores.tipoPersonaJuridica required=true}}
+        {{> ingreso-campo id="cuit" name="cuit" label="CUIT" value=valores.cuit error=errores.cuit required=true maxlength=13 inputmode="numeric" placeholder="30-12345678-9" hint="Con o sin guiones." autocomplete="off"}}
+        {{> ingreso-campo id="rubro" name="rubro" label="Rubro" value=valores.rubro error=errores.rubro required=true maxlength=80 placeholder="Ej.: Alimentos, Textil, Educación" autocomplete="off"}}
+      {{/if}}
+      {{> ingreso-campo id="email" name="email" label="Correo electrónico" value=valores.email error=errores.email required=true type="email" maxlength=120 placeholder="nombre@dominio.com" hint="Es el medio de contacto para las notificaciones y para avisarle que ya puede ingresar." autocomplete="off" class="form-full"}}
+
+      <div class="form-full acciones-form">
+        <a class="button button-outline" href="{{urlVolver}}">Cancelar</a>
+        <button class="button button-primary" type="submit" data-busy-text="Registrando…">Registrar y continuar</button>
+      </div>
+    </form>
+  </section>
+</div>
+<script type="module" src="/js/ingreso/comun.js"></script>

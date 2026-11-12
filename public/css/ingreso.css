@@ -1,0 +1,700 @@
+/*
+ * Flujo 3: Ingreso de donaciones (buscar/registrar donante, cargar donación, resultado e importación CSV).
+ * Usa los tokens de styles.css (--primary, --ink, --outline, --radius-*, ...): no define colores propios salvo
+ * los del estado de error, que son los mismos de .notice-error. Todas las reglas cuelgan de .ingreso,
+ * así que no afectan a las demás pantallas. Lo cargan las vistas de views/admin/ingreso/ con un <link>.
+ */
+
+.ingreso [hidden] {
+  display: none !important;
+}
+
+.ingreso .tag {
+  white-space: nowrap;
+}
+
+/* ---------- Pasos ---------- */
+
+.pasos {
+  margin: 8px 0 20px;
+}
+
+.pasos ol {
+  display: flex;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.paso {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+}
+
+.paso + .paso::before {
+  height: 2px;
+  min-width: 12px;
+  flex: 1;
+  content: "";
+  background: var(--outline);
+}
+
+.paso-hecho + .paso::before,
+.paso-hecho + .paso-actual::before {
+  background: var(--green);
+}
+
+.paso-contenido {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a.paso-contenido:hover .paso-texto {
+  text-decoration: underline;
+}
+
+.paso-numero {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  place-items: center;
+  color: var(--ink-muted);
+  background: var(--surface-raised);
+  border: 2px solid var(--outline);
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.paso-actual .paso-contenido {
+  color: var(--primary);
+}
+
+.paso-actual .paso-numero {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.paso-hecho .paso-numero {
+  color: #fff;
+  background: var(--green);
+  border-color: var(--green);
+}
+
+/* ---------- Formularios ---------- */
+
+.ingreso .field > label {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ingreso .field textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 13px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--outline);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.ingreso .field textarea:focus {
+  border-color: var(--primary);
+  outline: 3px solid rgb(0 74 198 / 16%);
+}
+
+.ingreso .field input[type="file"] {
+  padding: 10px 13px;
+  background: var(--surface-low);
+  border-style: dashed;
+  cursor: pointer;
+}
+
+.ingreso .field .field-hint {
+  margin: 0;
+}
+
+.obligatorio {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.field-error {
+  margin: 0;
+  color: #991b1b;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.tiene-error input,
+.tiene-error select,
+.tiene-error textarea {
+  border-color: #dc2626;
+  background: #fffafa;
+}
+
+.resumen-errores ul {
+  padding-left: 20px;
+  margin: 8px 0 0;
+}
+
+.resumen-errores a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.resumen-errores:focus {
+  outline: 3px solid rgb(185 28 28 / 30%);
+  outline-offset: 2px;
+}
+
+.acciones-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ingreso-form {
+  display: grid;
+  gap: 16px;
+}
+
+.ingreso-form.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px 14px;
+}
+
+.subtitulo {
+  margin: 20px 0 10px;
+  font-size: 16px;
+}
+
+/* ---------- Paso 1: búsqueda y alta ---------- */
+
+.busqueda {
+  align-items: flex-start;
+}
+
+.busqueda .field {
+  min-width: 260px;
+}
+
+.busqueda .button {
+  margin-top: 19px;
+}
+
+.lista-donantes {
+  display: grid;
+  padding: 0;
+  margin: 0;
+  gap: 10px;
+  list-style: none;
+}
+
+.donante-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+}
+
+.donante-item:hover {
+  border-color: var(--primary);
+  background: var(--surface);
+}
+
+.avatar {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  color: var(--primary);
+  background: var(--surface-selected);
+  border-radius: 50%;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ingreso .celda strong {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+
+.ingreso .celda small {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.cta-alta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cta-alta h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.cta-alta p {
+  margin: 0;
+}
+
+.segmentado {
+  display: inline-flex;
+  padding: 4px;
+  margin: 8px 0 20px;
+  background: var(--surface-low);
+  border-radius: var(--radius-md);
+}
+
+.segmentado-opcion {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  padding: 0 18px;
+  color: var(--ink-muted);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.segmentado-opcion:hover {
+  color: var(--ink);
+}
+
+.segmentado-opcion.is-active {
+  color: var(--primary);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-card);
+}
+
+/* ---------- Paso 2: carga de la donación ---------- */
+
+.ingreso-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 20px;
+}
+
+.ingreso-principal {
+  min-width: 0;
+}
+
+.ingreso-lateral {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 16px;
+}
+
+.ingreso-lateral .surface-card {
+  padding: 20px;
+}
+
+.ingreso-lateral h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.datos-donante {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.datos-donante div {
+  display: grid;
+  gap: 1px;
+}
+
+.datos-donante dt {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.datos-donante dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.ingreso .text-link {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+}
+
+.segmentacion-total {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.segmentacion-lista {
+  display: grid;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.segmentacion-lista li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--surface-low);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-sm);
+}
+
+.segmentacion-lista small {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.bienes-lista {
+  display: grid;
+  gap: 16px;
+}
+
+.bien-fila {
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-md);
+}
+
+.bien-fila.tiene-errores {
+  border-color: #dc2626;
+}
+
+.bien-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bien-encabezado h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.bien-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+
+.bien-nombre,
+.bien-subcategoria {
+  grid-column: span 1;
+}
+
+.medida-controles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.bien-extra {
+  margin-top: 12px;
+}
+
+.bien-extra summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.bien-extra[open] summary {
+  margin-bottom: 8px;
+}
+
+.agregar-bien {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.acciones-sticky {
+  position: sticky;
+  z-index: 5;
+  bottom: 0;
+  padding: 12px 0;
+  background: linear-gradient(to top, var(--surface) 70%, transparent);
+}
+
+/* ---------- Paso 3: resultado ---------- */
+
+.resultado-resumen {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.resultado-resumen h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+}
+
+.resultado-resumen p {
+  margin: 0;
+}
+
+.resultado-resumen h2:focus {
+  outline: none;
+}
+
+.resultado-icono {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  place-items: center;
+  color: var(--green);
+  background: var(--green-soft);
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.resultado-lista {
+  display: grid;
+  padding: 0;
+  margin: 16px 0;
+  gap: 14px;
+  list-style: none;
+}
+
+.donacion-creada {
+  padding: 20px;
+}
+
+.donacion-creada-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.donacion-creada h3 {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+
+.donacion-creada .muted {
+  margin: 8px 0 12px;
+}
+
+.donacion-creada .table-actions {
+  margin-top: 12px;
+}
+
+.acciones-resultado {
+  justify-content: flex-start;
+  margin-top: 20px;
+}
+
+/* ---------- Importación CSV ---------- */
+
+.importar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.archivo-elegido {
+  margin: 0;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+#importando {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#importando .button-spinner {
+  flex: none;
+  color: var(--primary);
+}
+
+.tabla-formato {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tabla-formato th,
+.tabla-formato td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--outline);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabla-formato th[scope="row"] {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tabla-formato code {
+  padding: 1px 5px;
+  background: var(--surface-low);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.metricas-importacion {
+  margin: 16px 0;
+}
+
+.metric-red {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.metric-red > strong {
+  color: #991b1b;
+}
+
+.resultado-importacion .notice {
+  margin-top: 0;
+}
+
+/* ---------- Estado de carga ---------- */
+
+.sk-fila {
+  height: 64px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-md);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1000px) {
+  .ingreso-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ingreso-lateral {
+    position: static;
+    order: -1;
+  }
+
+  .importar-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ingreso-form.form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .ingreso-form.form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .donante-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .donante-item .tag,
+  .donante-item .button {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .busqueda .field,
+  .busqueda .button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .busqueda .button {
+    margin-top: 0;
+  }
+
+  .paso-texto {
+    font-size: 12px;
+  }
+
+  .paso + .paso::before {
+    min-width: 6px;
+  }
+
+  .paso-contenido {
+    gap: 5px;
+  }
+
+  .acciones-form .button,
+  .acciones-resultado .button {
+    width: 100%;
+  }
+
+  .metricas-importacion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .medida-controles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resultado-resumen {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  /* Con poco ancho solo queda visible el nombre del paso actual: el número ya dice dónde está. */
+  .paso:not(.paso-actual) .paso-texto {
+    display: none;
+  }
+}

@@ -1,0 +1,9 @@
+{{!-- Resumen de errores de un formulario. Recibe resumen = [{ campo, mensaje }]; cada ítem enlaza al campo (id = campo). comun.js le da el foco al aparecer. --}}
+{{#if resumen.length}}
+<div class="notice notice-error resumen-errores" id="resumen-errores" role="alert" tabindex="-1">
+  <strong>Revisá estos datos para continuar:</strong>
+  <ul>
+    {{#each resumen}}<li><a href="#{{campo}}">{{mensaje}}</a></li>{{/each}}
+  </ul>
+</div>
+{{/if}}

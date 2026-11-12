@@ -14,6 +14,7 @@ import authRoutes from "./routes/auth.js";
 import donacionesEntidadRoutes from "./routes/donaciones-entidad.js";
 import donorRoutes from "./routes/donor.js";
 import entityRoutes from "./routes/entity.js";
+import ingresoRoutes from "./routes/ingreso.js";
 import logisticaRoutes from "./routes/logistica.js";
 import publicRoutes from "./routes/public.js";
 import { AUTH_DEV_BYPASS, PORT } from "./src/config.js";
@@ -67,6 +68,8 @@ app.use(donorRoutes);
 app.use(entityRoutes);
 app.use(adminRoutes);
 app.use("/admin/logistica", requireRole("ADMIN"), logisticaRoutes);
+// Flujo 3 (ingreso): va ANTES que asignaciones, cuya ruta /:id se llevaría /nueva e /importar.
+app.use("/admin/donaciones", requireRole("ADMIN"), ingresoRoutes);
 app.use("/admin/donaciones", requireRole("ADMIN"), asignacionesRoutes);
 app.use("/entidad/donaciones", requireRole("ENTIDAD"), donacionesEntidadRoutes);
 

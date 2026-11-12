@@ -1,0 +1,9 @@
+{{!-- Lista desplegable con etiqueta y error. Parámetros: id, name, label, options ([{ valor, texto, seleccionado }]), error, required, hint, class. --}}
+<div class="field{{#if class}} {{class}}{{/if}}{{#if error}} tiene-error{{/if}}">
+  <label for="{{id}}">{{label}}{{#if required}} <span class="obligatorio" aria-hidden="true">*</span>{{/if}}</label>
+  <select id="{{id}}" name="{{name}}"{{#if required}} required{{/if}}{{#if error}} aria-invalid="true"{{/if}}{{#if hint}} aria-describedby="{{id}}-ayuda{{#if error}} {{id}}-error{{/if}}"{{else if error}} aria-describedby="{{id}}-error"{{/if}}>
+    {{#each options}}<option value="{{valor}}"{{#if seleccionado}} selected{{/if}}>{{texto}}</option>{{/each}}
+  </select>
+  {{#if hint}}<p class="field-hint" id="{{id}}-ayuda">{{hint}}</p>{{/if}}
+  {{#if error}}<p class="field-error" id="{{id}}-error">{{error}}</p>{{/if}}
+</div>
