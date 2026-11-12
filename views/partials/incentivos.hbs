@@ -1,11 +1,31 @@
 <section class="surface-card section-block" aria-labelledby="impacto-titulo">
   <div class="section-heading"><div><p class="eyebrow">Incentivos</p><h2 id="impacto-titulo">Mi impacto</h2><p>Categoría actual: <strong>{{profile.level}}</strong></p></div></div>
   {{#if errors.profile}}<p class="notice notice-error" role="alert">{{errors.profile}}</p>{{/if}}
-  <div class="metric-grid">
-    <article class="metric-card metric-green"><span>Bienes donados</span><strong>{{profile.points}}</strong><small>Impacto acumulado</small></article>
-    <article class="metric-card metric-blue"><span>Organizaciones ayudadas</span><strong>{{profile.organizations}}</strong><small>Distintas entidades</small></article>
-    <article class="metric-card metric-violet"><span>Posición en el ranking</span><strong>{{profile.position}}</strong><small>Según cantidad de donaciones</small></article>
-    <article class="metric-card"><span>Vs. mes anterior</span><strong>{{profile.monthChange}}</strong><small>Bienes donados este mes</small></article>
+   <div class="metric-grid">
+    <article class="metric-card metric-green">
+      <span>Bienes donados
+        <button type="button" class="help" data-tip="Suma de todos los bienes que donaste." aria-label="Ayuda: suma de todos los bienes que donaste."><span class="help-dot" aria-hidden="true">?</span></button>
+      </span>
+      <strong>{{profile.points}}</strong><small>Impacto acumulado</small>
+    </article>
+    <article class="metric-card metric-blue">
+      <span>Organizaciones ayudadas
+        <button type="button" class="help" data-tip="Cantidad de entidades distintas a las que les donaste." aria-label="Ayuda: cantidad de entidades distintas a las que les donaste."><span class="help-dot" aria-hidden="true">?</span></button>
+      </span>
+      <strong>{{profile.organizations}}</strong><small>Distintas entidades</small>
+    </article>
+    <article class="metric-card metric-violet">
+      <span>Posición en el ranking
+        <button type="button" class="help" data-tip="1 significa que sos quien más donaciones hizo. Si es 3, hay 2 donantes con más donaciones que vos." aria-label="Ayuda: 1 significa que sos quien más donaciones hizo. Si es 3, hay 2 donantes con más donaciones que vos."><span class="help-dot" aria-hidden="true">?</span></button>
+      </span>
+      <strong>{{profile.position}}</strong><small>Según cantidad de donaciones</small>
+    </article>
+    <article class="metric-card">
+      <span>Vs. mes anterior
+        <button type="button" class="help" data-tip="Cuánto cambió la cantidad de bienes donados este mes respecto del mes pasado. Si el mes pasado no donaste, muestra 0%." aria-label="Ayuda: cuánto cambió la cantidad de bienes donados este mes respecto del mes pasado. Si el mes pasado no donaste, muestra 0%."><span class="help-dot" aria-hidden="true">?</span></button>
+      </span>
+      <strong>{{profile.monthChange}}</strong><small>Bienes donados este mes</small>
+    </article>
   </div>
   {{#if profile.evolution.length}}
   <h3>Evolución por mes</h3>
