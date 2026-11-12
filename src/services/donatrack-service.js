@@ -5,6 +5,11 @@ export const donatrackService = {
     apiRequest(req, "donaciones", `/api/donaciones${toQueryString(params)}`),
   getEntities: (req) =>
     apiRequest(req, "donaciones", "/api/entidades-beneficiarias"),
+  createEntity: (req, entity) =>
+    apiRequest(req, "donaciones", "/api/entidades-beneficiarias", {
+      method: "POST",
+      body: entity,
+    }),
   getNeeds: (req, params = {}) =>
     apiRequest(req, "donaciones", `/api/necesidades${toQueryString(params)}`),
   getSubcategories: (req) => apiRequest(req, "donaciones", "/api/subcategorias"),

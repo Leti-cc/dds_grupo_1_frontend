@@ -3,6 +3,7 @@ import { AUTH_DEV_BYPASS } from "../src/config.js";
 
 const NAVIGATION = [
   { path: "/", label: "Inicio" },
+  { path: "/galeria", label: "Fotos de entregas" },
   { path: "/seguimiento", label: "Seguimiento" },
   { path: "/donante", label: "Donante" },
   { path: "/entidad", label: "Entidad" },
