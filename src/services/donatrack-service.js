@@ -10,6 +10,8 @@ export const donatrackService = {
       method: "POST",
       body: entity,
     }),
+  getEntityByIdentity: (req, keycloakUserId) =>
+    apiRequest(req, "donaciones", `/api/entidades-beneficiarias/por-identidad/${encodeURIComponent(keycloakUserId)}`),
   getNeeds: (req, params = {}) =>
     apiRequest(req, "donaciones", `/api/necesidades${toQueryString(params)}`),
   getSubcategories: (req) => apiRequest(req, "donaciones", "/api/subcategorias"),

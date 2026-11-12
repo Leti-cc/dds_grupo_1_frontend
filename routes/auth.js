@@ -1,5 +1,5 @@
-import { Router } from "express";
 import { randomBytes, timingSafeEqual } from "node:crypto";
+import { Router } from "express";
 import { field, formErrorStatus, getRoleRoute } from "../src/lib/page-data.js";
 import { authService } from "../src/services/auth-service.js";
 import { donatrackService } from "../src/services/donatrack-service.js";
@@ -24,12 +24,19 @@ function renderLogin(req, res, extra = {}, status = 200) {
     title: "Ingresar",
     authPage: true,
     csrfToken: formToken(req, "login"),
-    user: authService.getSession(req)?.user ?? null,
     ...extra,
   });
 }
 
 router.get("/login", (req, res) => renderLogin(req, res));
+
+router.get("/auth/start", async (req, res) => {
+  try {
+    return res.redirect(await authService.startLogin(req));
+  } catch (error) {
+    return renderLogin(req, res, { authError: error.message }, 503);
+  }
+});
 
 function renderRegistration(req, res, extra = {}, status = 200) {
   res.status(status).render("register", { title: "Registrar entidad", authPage: true, csrfToken: formToken(req, "register"), ...extra });
@@ -48,6 +55,8 @@ router.post("/registro", async (req, res) => {
     representanteNombre: field(req.body, "representanteNombre"),
     representanteApellido: field(req.body, "representanteApellido"),
   };
+  const password = String(req.body?.password ?? "");
+  const passwordConfirmation = String(req.body?.passwordConfirmation ?? "");
   const tipos = new Set(["ESCUELARURAL", "COMEDOR", "ESPACIOTUTORIA"]);
   const valid = values.razonSocial.length >= 3 && values.razonSocial.length <= 120
     && tipos.has(values.tipoEntidad) && /^[0-9-]{11,13}$/.test(values.cuit)
@@ -55,14 +64,28 @@ router.post("/registro", async (req, res) => {
     && values.direccion.length >= 5 && values.direccion.length <= 200
     && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email) && values.email.length <= 254
     && values.representanteNombre.length >= 2 && values.representanteNombre.length <= 80
-    && values.representanteApellido.length >= 2 && values.representanteApellido.length <= 80;
+    && values.representanteApellido.length >= 2 && values.representanteApellido.length <= 80
+    && password.length >= 8 && password.length <= 128
+    && password === passwordConfirmation;
   if (!valid) {
-    return renderRegistration(req, res, { values, error: "Revisá los datos obligatorios del formulario." }, 422);
+    const error = password !== passwordConfirmation
+      ? "Las contraseñas no coinciden."
+      : "Revisá los datos obligatorios del formulario.";
+    return renderRegistration(req, res, { values, error }, 422);
   }
+
+  let keycloakUserId;
   try {
+    keycloakUserId = await authService.registerEntityAccount({
+      email: values.email,
+      password,
+      firstName: values.representanteNombre,
+      lastName: values.representanteApellido,
+    });
     await donatrackService.createEntity(req, {
       tipoEntidad: values.tipoEntidad,
       direccion: values.direccion,
+      keycloakUserId,
       organizacion: {
         razonSocial: values.razonSocial,
         cuit: values.cuit.replace(/\D/g, ""),
@@ -76,64 +99,50 @@ router.post("/registro", async (req, res) => {
     delete req.session.formTokens.register;
     return renderRegistration(req, res, { registered: true });
   } catch (error) {
+    if (keycloakUserId) {
+      try {
+        await authService.deleteRegisteredAccount(keycloakUserId);
+      } catch (cleanupError) {
+        console.error("[auth] No se pudo compensar la cuenta de registro:", cleanupError.message);
+      }
+    }
     return renderRegistration(req, res, { values, error: error.mensajeUsuario || "No pudimos registrar la entidad. Intentá nuevamente." }, formErrorStatus(error));
   }
 });
 
 router.post("/login", async (req, res) => {
-  if (!hasValidFormToken(req, "login")) return renderLogin(req, res, { formErrors: { login: "La sesión del formulario venció. Recargá la página e intentá de nuevo." } }, 403);
-  const identifier = field(req.body, "identifier");
-  const password = String(req.body?.password ?? "");
-  // Nunca se devuelve la contraseña a la vista.
-  const values = { login: { identifier, remember: req.body?.remember ? "on" : "" } };
-
-  if (identifier.length < 3 || !password) {
-    return renderLogin(req, res, {
-      values,
-      formErrors: { login: "Completá el usuario (mínimo 3 caracteres) y la contraseña." },
-    }, 400);
+  if (!hasValidFormToken(req, "login")) {
+    return renderLogin(req, res, { authError: "La sesión del formulario venció. Recargá la página e intentá de nuevo." }, 403);
   }
-
-  let user;
   try {
-    user = await authService.login(req, {
-      identifier,
-      password,
-      remember: Boolean(req.body?.remember),
-    });
+    return res.redirect(await authService.startLogin(req));
   } catch (error) {
-    return renderLogin(req, res, { values, formErrors: { login: error.message } }, formErrorStatus(error));
-  }
-
-  req.flash({ type: "success", toast: "Inicio de sesión exitoso." });
-  return res.redirect(getRoleRoute(user.role ?? user.rol));
-});
-
-router.get("/login/:provider", (req, res) => {
-  try {
-    return res.redirect(authService.getSocialLoginUrl(req.params.provider));
-  } catch (error) {
-    req.flash({ type: "error", toast: error.message });
-    return res.redirect("/login");
+    return renderLogin(req, res, { authError: error.message }, 503);
   }
 });
 
 router.get("/auth/callback", async (req, res) => {
   try {
-    const user = await authService.completeSocialLogin(req, {
-      code: typeof req.query.code === "string" ? req.query.code : "",
-      state: typeof req.query.state === "string" ? req.query.state : "",
-    });
-    req.flash({ type: "success", toast: "Inicio de sesión exitoso." });
-    return res.redirect(getRoleRoute(user.role ?? user.rol));
+    const redirectUri = new URL(process.env.KEYCLOAK_REDIRECT_URI || "http://localhost:3000/auth/callback");
+    const user = await authService.completeLogin(req, new URL(req.originalUrl, redirectUri.origin));
+    if (user.role === "ENTIDAD") {
+      const entity = await donatrackService.getEntityByIdentity(req, user.id);
+      req.session.user.entidadId = entity.id;
+    }
+    return res.redirect(getRoleRoute(user.role));
   } catch (error) {
-    return renderLogin(req, res, { authError: error.message }, formErrorStatus(error));
+    console.error("[auth] Callback OIDC rechazado:", error.message);
+    if (req.session) {
+      delete req.session.accessToken;
+      delete req.session.user;
+      delete req.session.oidcLogin;
+    }
+    return renderLogin(req, res, { authError: "No pudimos validar el inicio de sesión." }, 401);
   }
 });
 
 router.post("/logout", async (req, res) => {
   await authService.logout(req);
-  req.flash({ type: "success", toast: "Se cerró la sesión." });
   res.redirect("/");
 });
 

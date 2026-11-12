@@ -26,7 +26,7 @@ Incluye las seis vistas diagramadas en la entrega 1:
 
 - Portal público con indicadores y entregas recientes (`/`).
 - Seguimiento público de una entrega (`/seguimiento`).
-- Ingreso y primera iteración del servicio de autenticación (`/login`).
+- Ingreso OIDC con Keycloak y autorización por rol (`/login`).
 - Panel de donante con perfil, misiones, insignias y ranking (`/donante`).
 - Panel de entidad con necesidades y entregas en curso (`/entidad`).
 - Panel administrativo con donaciones, alta/importación de donantes y flota (`/administracion`).
@@ -55,7 +55,7 @@ al formulario.
 
 ### Requisitos
 
-- Node.js 18.11 o superior y npm (npm se instala junto con Node.js).
+- Node.js 20 o superior y npm (npm se instala junto con Node.js).
 - El backend Java sólo es necesario para consultar o modificar datos reales. El
   frontend puede iniciarse sin los servicios; mostrará avisos de conexión.
 - PowerShell, una terminal de VS Code o una terminal compatible.
@@ -107,10 +107,11 @@ navegador.
 | `NOTIFICACIONES_API_URL` | URL base del historial de notificaciones mostrado en administración. | `http://localhost:8081` |
 | `INCENTIVOS_API_URL` | URL base del perfil, las misiones, las insignias y el ranking de donantes. | `http://localhost:8082` |
 | `LOGISTICA_API_URL` | URL base de camiones y entregas; incluye el seguimiento público. | `http://localhost:8083` |
-| `AUTH_API_URL` | URL base reservada para el servicio de autenticación y su futuro endpoint de login/callback. | `http://localhost:8084` |
-| `AUTH_GOOGLE_URL` | URL de autorización provista por el backend para iniciar el flujo OAuth/OIDC con Google. Vacía hasta que se configure. | Vacío |
-| `AUTH_MICROSOFT_URL` | URL de autorización provista por el backend para iniciar el flujo OAuth/OIDC con Microsoft. Vacía hasta que se configure. | Vacío |
-| `AUTH_INSTITUCIONAL_URL` | URL de autorización provista por el backend para iniciar el flujo SSO institucional. Vacía hasta que se configure. | Vacío |
+| `KEYCLOAK_ISSUER` | Issuer OIDC exacto del realm de DonaTrack. | `http://localhost:8084/realms/donatrack` |
+| `KEYCLOAK_CLIENT_ID` | Cliente público configurado en Keycloak. | `donatrack-frontend` |
+| `KEYCLOAK_REDIRECT_URI` | Callback permitido en el cliente OIDC. | `http://localhost:3000/auth/callback` |
+| `KEYCLOAK_REGISTRATION_CLIENT_ID` | Cliente de servicio usado sólo para crear cuentas desde `/registro`. | `donatrack-registration` |
+| `KEYCLOAK_REGISTRATION_CLIENT_SECRET` | Secreto del cliente de registro; debe coincidir con `DonaTrack/.env`. | — |
 
 Los valores de ejemplo asumen que los servicios Java corren localmente en esos
 puertos. Si el backend está en otra dirección, reemplazar la URL correspondiente
@@ -217,41 +218,17 @@ Levanta el mismo servidor sin `--watch`. Ya no hay paso de compilación. Para un
 despliegue real, definir `SESSION_SECRET` y reemplazar el store de sesión en
 memoria (el que trae `express-session` por defecto) por uno persistente.
 
-### Autenticación: primera iteración y pendiente del backend
+### Autenticación con Keycloak
 
-El frontend deja listo el servicio cliente, pero **el ingreso real y el SSO no funcionarán hasta que el backend publique y configure sus rutas**. No se simula un inicio exitoso.
+El ingreso redirige a Keycloak y usa Authorization Code Flow con PKCE S256 y
+`state`. El servidor del front guarda el usuario y el access token en su sesión;
+el navegador sólo recibe la cookie de sesión y nunca ve el token.
 
-Contrato inicial propuesto para alinear con el backend:
-
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{ "identifier": "persona@organizacion.org", "password": "..." }
-```
-
-```json
-{
-  "accessToken": "...",
-  "user": {
-    "username": "persona",
-    "role": "DONANTE",
-    "entidadId": 1
-  }
-}
-```
-
-El servidor del front guarda el token en la sesión del servidor
-(`req.session.accessToken`) y lo envía a las APIs como
-`Authorization: Bearer ...`. El navegador solo recibe la cookie de sesión
-(`HttpOnly`, `SameSite=Lax`) y nunca ve el token. Sin marcar "Recordar", la
-cookie dura hasta cerrar el navegador; con la opción marcada, 30 días. El
-retorno del SSO llega a `/auth/callback?code=...&state=...`. Para producción,
-acuerden con el backend la expiración y renovación del token y el contrato
-OAuth/OIDC.
+El registro de entidades crea una cuenta con rol `ENTIDAD` en Keycloak y guarda
+su identificador en el servicio de Donaciones. Así, al iniciar sesión, el panel
+recupera automáticamente la entidad vinculada.
 
 Las rutas protegidas por rol usan `requireRole(...)` de `middleware/auth.js`.
-Es provisorio hasta que el servicio de autenticación defina sus roles;
-`AUTH_DEV_BYPASS=true` lo desactiva en desarrollo.
+`AUTH_DEV_BYPASS=true` sigue disponible exclusivamente para desarrollo local.
 
 `entidadId` de parte de logística todavia no esta expuesto. Por eso, el panel de entidad muestra explícitamente que falta esa relación en lugar de atribuir entregas de otras organizaciones. Para completar esa sección, el backend debe agregar la entidad a la respuesta o exponer una consulta de entregas por entidad.

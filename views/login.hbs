@@ -5,18 +5,13 @@
     <img class="auth-illustration" src="/images/visitante/login-ilustracion.png" alt="Caja de donaciones solidarias">
   </aside>
   <section class="auth-form-pane" aria-labelledby="login-title">
-    <div class="auth-form-content"><h1 id="login-title">Iniciar sesión</h1><p class="auth-subtitle">Accedé con tu cuenta de DonaTrack</p>
+    <div class="auth-form-content">
+      <h1 id="login-title">Iniciar sesión</h1>
+      <p class="auth-subtitle">Accedé de forma segura con tu cuenta de DonaTrack</p>
       {{#if authError}}<p class="notice notice-error" role="alert">{{authError}}</p>{{/if}}
-      <form id="login-form" class="form-stack" method="post" action="/login">
-        <input type="hidden" name="_csrf" value="{{csrfToken}}">
-        <label class="field"><span>Correo electrónico o usuario</span><input name="identifier" type="text" autocomplete="username" placeholder="tu@email.org" required minlength="3" value="{{values.login.identifier}}"></label>
-        <label class="field"><span>Contraseña</span><span class="password-control"><input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required><button class="password-toggle" type="button" data-action="toggle-password" aria-label="Mostrar contraseña">Ver</button></span></label>
-        <label class="checkbox-field"><input name="remember" type="checkbox"{{#if values.login.remember}} checked{{/if}}><span>Recordar mi sesión</span></label>
-        <p id="login-error" class="notice notice-error" role="alert" {{#unless formErrors.login}}hidden{{/unless}}>{{formErrors.login}}</p>
-        <button class="button button-primary button-wide" type="submit">Iniciar sesión</button>
-      </form>
-      <div class="auth-divider"><span>O continuá con</span></div>
-      <div class="auth-social"><a class="button button-outline" href="/login/google">Continuar con Google</a></div>
+      <div class="form-stack">
+        <a class="button button-primary button-wide" href="/auth/start">Continuar al ingreso seguro</a>
+      </div>
       <p class="auth-register-prompt">¿No tenés cuenta? <a href="/registro">Registrá tu organización</a></p>
     </div>
   </section>

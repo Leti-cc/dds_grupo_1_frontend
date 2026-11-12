@@ -22,6 +22,12 @@ import { helpers } from "./src/helpers/handlebars.js";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+app.use((req, res, next) => {
+  console.log(`[request] ${req.method} ${req.originalUrl}`);
+  res.on("finish", () => console.log(`[response] ${res.statusCode} ${req.method} ${req.originalUrl}`));
+  next();
+});
+
 app.engine(
   ".hbs",
   engine({
@@ -63,8 +69,11 @@ app.use(layoutLocals);
 
 app.use(publicRoutes);
 app.use(authRoutes);
+app.use("/donante", requireRole("DONANTE"));
 app.use(donorRoutes);
+app.use("/entidad", requireRole("ENTIDAD"));
 app.use(entityRoutes);
+app.use("/administracion", requireRole("ADMIN"));
 app.use(adminRoutes);
 app.use("/admin/logistica", requireRole("ADMIN"), logisticaRoutes);
 app.use("/admin/donaciones", requireRole("ADMIN"), asignacionesRoutes);
