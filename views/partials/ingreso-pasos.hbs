@@ -1,0 +1,14 @@
+{{!-- Indicador "Paso 1 de 3" del flujo 3. Recibe pasos = pasosIngreso(...) (src/lib/ingreso-vista.js). Los pasos ya hechos son links para volver. --}}
+<nav class="pasos" aria-label="Progreso de la carga">
+  <ol>
+    {{#each pasos}}
+    <li class="paso paso-{{estado}}"{{#if actual}} aria-current="step"{{/if}}>
+      {{#if href}}
+      <a class="paso-contenido" href="{{href}}"><span class="paso-numero" aria-hidden="true">✓</span><span class="paso-texto">{{texto}}</span><span class="visually-hidden"> (paso {{numero}} de 3, completado)</span></a>
+      {{else}}
+      <span class="paso-contenido"><span class="paso-numero" aria-hidden="true">{{#if hecho}}✓{{else}}{{numero}}{{/if}}</span><span class="paso-texto">{{texto}}</span><span class="visually-hidden"> (paso {{numero}} de 3{{#if actual}}, actual{{/if}})</span></span>
+      {{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</nav>

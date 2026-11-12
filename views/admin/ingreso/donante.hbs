@@ -1,0 +1,71 @@
+<link rel="stylesheet" href="/css/ingreso.css">
+<div class="asignaciones ingreso">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Administración · Donaciones</p>
+      <h1>Registrar donación</h1>
+      <p class="lead">Cargá lo que una persona o una organización trae al depósito. Primero buscá al donante; si es la primera vez que dona, registralo.</p>
+    </div>
+  </section>
+
+  {{> donaciones-tabs}}
+  {{> ingreso-pasos}}
+
+  <aside class="hint" data-hint="ingreso-buscar" aria-label="Ayuda" hidden>
+    <p>Buscá primero para no duplicar donantes. Podés escribir el nombre, el apellido, el DNI o CUIT, la razón social o el correo.</p>
+    <button class="hint-close" type="button" aria-label="Cerrar ayuda" data-hint-close><span aria-hidden="true">×</span></button>
+  </aside>
+
+  <section class="surface-card section-block" aria-labelledby="buscar-titulo">
+    <div class="section-heading"><div><h2 id="buscar-titulo">Paso 1 · ¿Quién dona?</h2></div></div>
+    <form class="filtros busqueda" method="get" action="/admin/donaciones/nueva" role="search" aria-label="Buscar donante" data-busqueda>
+      <div class="field grow{{#if errorBusqueda}} tiene-error{{/if}}">
+        <label for="busqueda-q">Buscar donante</label>
+        <input id="busqueda-q" type="search" name="q" value="{{q}}" maxlength="60" autocomplete="off" placeholder="Nombre, DNI, CUIT, razón social o correo"{{#if errorBusqueda}} aria-invalid="true" aria-describedby="busqueda-error"{{/if}}>
+        {{#if errorBusqueda}}<p class="field-error" id="busqueda-error">{{errorBusqueda}}</p>{{/if}}
+      </div>
+      <button class="button button-primary" type="submit">Buscar</button>
+    </form>
+  </section>
+
+  {{#if servicioNoDisponible}}{{> asignaciones-no-disponible url=urlReintento}}{{/if}}
+  {{#if errorLista}}<p class="notice notice-error" role="alert">{{errorLista}}</p>{{/if}}
+
+  {{#if buscado}}
+  <section class="surface-card section-block" aria-labelledby="resultados-titulo" data-resultados aria-live="polite">
+    <div class="section-heading"><div><h2 id="resultados-titulo">Resultados para “{{q}}”</h2></div></div>
+    {{#if resultados.length}}
+    <ul class="lista-donantes">
+      {{#each resultados}}
+      <li class="donante-item">
+        <span class="avatar" aria-hidden="true">{{inicial}}</span>
+        <div class="celda">
+          <strong>{{nombre}}</strong>
+          <small>{{documentoEtiqueta}} {{documento}} · {{email}}</small>
+          {{#if detalle}}<small>{{detalle}}</small>{{/if}}
+        </div>
+        <span class="tag {{tipoClase}}">{{tipoTexto}}</span>
+        <a class="button button-primary button-small" href="{{hrefElegir}}" aria-label="Elegir a {{nombre}} y cargar su donación">Elegir →</a>
+      </li>
+      {{/each}}
+    </ul>
+    {{#if hayMas}}<p class="field-hint">Mostramos las primeras 20 coincidencias. Escribí más datos (por ejemplo el DNI o el correo completo) para acotar la búsqueda.</p>{{/if}}
+    {{else if sinResultados}}
+    <div class="empty-state compact">
+      <strong>No encontramos a nadie con “{{q}}”.</strong>
+      <span>Revisá cómo lo escribiste o registrá al donante nuevo.</span>
+      <a class="button button-primary" href="{{urlNuevoDonante}}">Registrar donante nuevo</a>
+    </div>
+    {{/if}}
+  </section>
+  {{/if}}
+
+  <section class="surface-card section-block cta-alta" aria-labelledby="alta-titulo">
+    <div>
+      <h2 id="alta-titulo">¿Es la primera vez que dona?</h2>
+      <p class="section-description">Pedile sus datos y registralo. Le enviamos un correo de bienvenida para que acceda a la plataforma por primera vez.</p>
+    </div>
+    <a class="button button-outline" href="{{urlNuevoDonante}}">Registrar donante nuevo</a>
+  </section>
+</div>
+<script type="module" src="/js/ingreso/comun.js"></script>

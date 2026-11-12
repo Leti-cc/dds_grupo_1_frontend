@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="/css/ingreso.css">
+<div class="asignaciones ingreso">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Administración · Donaciones</p>
+      <h1>Donación registrada</h1>
+      <p class="lead">Así quedó segmentada la carga. Las donaciones nuevas están en depósito, listas para asignarse.</p>
+    </div>
+  </section>
+
+  {{> donaciones-tabs}}
+  {{> ingreso-pasos}}
+
+  {{#if servicioNoDisponible}}{{> asignaciones-no-disponible url=urlReintento}}{{/if}}
+  {{#if noCargadas}}{{#unless servicioNoDisponible}}<p class="notice notice-error" role="alert">No pudimos mostrar {{noCargadas}} de las donaciones de esta carga. Se registraron igual: las ves en “Todas las donaciones”.</p>{{/unless}}{{/if}}
+
+  {{#if hayDonaciones}}
+  <section class="surface-card section-block resultado-resumen" aria-labelledby="resultado-titulo">
+    <span class="resultado-icono" aria-hidden="true">✓</span>
+    <div>
+      <h2 id="resultado-titulo" tabindex="-1">Paso 3 · {{titulo}}</h2>
+      <p class="section-description">{{#if donanteNombre}}Donante: <strong>{{donanteNombre}}</strong>. {{/if}}{{explicacion}}</p>
+    </div>
+  </section>
+
+  <ol class="resultado-lista">
+    {{#each donaciones}}
+    <li class="surface-card donacion-creada">
+      <div class="donacion-creada-encabezado">
+        <div><p class="eyebrow">Donación #{{id}}</p><h3>{{subcategoriaNombre}}</h3></div>
+        <span class="tag {{estado.clase}}">{{estado.texto}}</span>
+      </div>
+      <p class="muted">{{descripcion}} · {{bienesTexto}} · {{cantidadTexto}} · Ingresó el {{fechaIngresoTexto}}</p>
+      <ul class="data-list">
+        {{#each items}}
+        <li>
+          <div><strong>{{nombre}}</strong>{{#if detalle}}<small>{{detalle}}</small>{{/if}}</div>
+          {{#if vencimientoTexto}}<span class="muted">Vence: {{vencimientoTexto}}</span>{{/if}}
+        </li>
+        {{/each}}
+      </ul>
+      <div class="table-actions"><a class="button button-outline button-small" href="{{hrefDetalle}}" aria-label="Ver el detalle de la donación #{{id}}">Ver detalle</a></div>
+    </li>
+    {{/each}}
+  </ol>
+  {{else}}
+  <section class="surface-card section-block">
+    <div class="empty-state compact">
+      <strong>No pudimos mostrar el resultado.</strong>
+      <span>La donación se registró. Podés verla en “Todas las donaciones”.</span>
+      <a class="button button-outline" href="/admin/donaciones/todas">Ver todas las donaciones</a>
+    </div>
+  </section>
+  {{/if}}
+
+  <div class="acciones-form acciones-resultado">
+    {{#if urlOtraDelDonante}}<a class="button button-outline" href="{{urlOtraDelDonante}}">Cargar otra donación del mismo donante</a>{{/if}}
+    <a class="button button-outline" href="{{urlNuevaCarga}}">Cargar para otro donante</a>
+    <a class="button button-primary" href="{{urlAsignar}}">Ir a asignar →</a>
+  </div>
+</div>
+<script type="module" src="/js/ingreso/comun.js"></script>

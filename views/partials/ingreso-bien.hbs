@@ -1,0 +1,54 @@
+{{!--
+  Una fila de bien del formulario de carga. Recibe una fila de vistaFila(...) (src/lib/ingreso-vista.js).
+  Se usa dentro del form (una por bien) y dentro del <template> que clona donacion.js.
+  Los controles de una fila son siempre <input> o <select>: se envían aunque estén ocultos, y así
+  las listas itemNombre, itemCantidad... quedan alineadas fila a fila en el servidor.
+--}}
+<div class="bien-fila{{#if hayErrores}} tiene-errores{{/if}}" role="group" aria-labelledby="item-{{n}}-titulo" data-bien>
+  <div class="bien-encabezado">
+    <h3 id="item-{{n}}-titulo">Bien <span data-numero>{{n}}</span></h3>
+    <button class="button button-outline button-small" type="button" data-quitar-bien aria-label="Quitar el bien {{n}}" hidden>Quitar</button>
+  </div>
+
+  <div class="bien-grid">
+    {{> ingreso-campo id=ids.nombre name="itemNombre" label="Nombre del bien" value=nombre error=errores.nombre required=true maxlength=100 placeholder="Ej.: Paquete de fideos" autocomplete="off" class="bien-nombre"}}
+
+    <div class="field bien-subcategoria{{#if errores.subcategoriaId}} tiene-error{{/if}}">
+      <label for="item-{{n}}-subcategoriaId">Subcategoría <span class="obligatorio" aria-hidden="true">*</span></label>
+      <select id="item-{{n}}-subcategoriaId" name="itemSubcategoriaId" required data-subcategoria{{#if errores.subcategoriaId}} aria-invalid="true" aria-describedby="item-{{n}}-subcategoriaId-error"{{/if}}>
+        <option value="">Elegí una subcategoría</option>
+        {{#each grupos}}
+        <optgroup label="{{categoria}}">
+          {{#each opciones}}<option value="{{valor}}" data-perecedero="{{perecedero}}" data-estado-uso="{{requiereEstadoUso}}"{{#if seleccionado}} selected{{/if}}>{{texto}}</option>{{/each}}
+        </optgroup>
+        {{/each}}
+      </select>
+      {{#if errores.subcategoriaId}}<p class="field-error" id="item-{{n}}-subcategoriaId-error">{{errores.subcategoriaId}}</p>{{/if}}
+    </div>
+
+    {{> ingreso-campo id=ids.cantidad name="itemCantidad" label="Cantidad" value=cantidad error=errores.cantidad required=true type="number" min="1" step="1" inputmode="numeric" hint="Cuántos hay de este bien." class="bien-cantidad"}}
+
+    <div class="campo-medida bien-medida" data-campo="medida"{{#unless muestraMedida}} hidden{{/unless}}>
+      <div class="medida-controles">
+        {{> ingreso-campo id=ids.medida name="itemMedida" label="Medida de cada uno" value=medida error=errores.medida type="number" min="0.001" step="any" inputmode="decimal" hint="Ej.: un paquete de 500 g → 500 y Gramo(s)."}}
+        {{> ingreso-select id=ids.unidad name="itemUnidad" label="Unidad" options=unidades error=errores.unidad}}
+      </div>
+    </div>
+
+    <div class="campo-estado-uso bien-estado" data-campo="estado-uso"{{#unless muestraEstadoUso}} hidden{{/unless}}>
+      {{> ingreso-select id=ids.estadoUso name="itemEstadoUso" label="Estado de uso" options=estadosUso error=errores.estadoUso required=muestraEstadoUso hint="Esta subcategoría necesita saber si el bien es nuevo o usado."}}
+    </div>
+
+    <div class="campo-vencimiento bien-vencimiento" data-campo="vencimiento"{{#unless muestraVencimiento}} hidden{{/unless}}>
+      {{> ingreso-campo id=ids.vencimiento name="itemVencimiento" label="Fecha de vencimiento" value=vencimiento error=errores.vencimiento required=muestraVencimiento type="date" hint="Es un bien perecedero."}}
+    </div>
+  </div>
+
+  <details class="bien-extra"{{#if extraAbierto}} open{{/if}}>
+    <summary>Más datos del bien (opcional)</summary>
+    <div class="bien-grid">
+      {{> ingreso-campo id=ids.descripcion name="itemDescripcion" label="Descripción" value=descripcion error=errores.descripcion maxlength=250 placeholder="Marca, talle, color, detalles…" autocomplete="off"}}
+      {{> ingreso-campo id=ids.foto name="itemFoto" label="Enlace a una foto" value=foto error=errores.foto type="url" maxlength=500 placeholder="https://…" hint="Pegá el enlace de una foto del bien, si la tenés." autocomplete="off"}}
+    </div>
+  </details>
+</div>

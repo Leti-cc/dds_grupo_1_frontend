@@ -1,0 +1,87 @@
+<link rel="stylesheet" href="/css/ingreso.css">
+<div class="asignaciones ingreso">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Administración · Donaciones</p>
+      <h1>Importar donantes</h1>
+      <p class="lead">Sumá el historial de personas donantes desde un archivo CSV. Si el correo ya está registrado, actualizamos sus datos; si no, creamos el usuario y le enviamos sus credenciales de acceso.</p>
+    </div>
+  </section>
+
+  {{> donaciones-tabs}}
+
+  <aside class="hint" data-hint="ingreso-importar" aria-label="Ayuda" hidden>
+    <p>Los archivos grandes (más de 10.000 filas) pueden tardar un par de minutos. Mientras se importa, no cierres ni recargues la página.</p>
+    <button class="hint-close" type="button" aria-label="Cerrar ayuda" data-hint-close><span aria-hidden="true">×</span></button>
+  </aside>
+
+  {{#if resultado}}
+  <section class="surface-card section-block resultado-importacion" aria-labelledby="resultado-importacion-titulo">
+    <div class="notice{{#if (eq resultado.estado "info")}} notice-info{{/if}}" data-state="{{resultado.estado}}" role="status">
+      <strong id="resultado-importacion-titulo" tabindex="-1">{{resultado.titulo}}</strong>
+    </div>
+    <div class="metric-grid metricas-importacion">
+      <article class="metric-card"><span>Filas procesadas</span><strong>{{resultado.procesados}}</strong><small>En total</small></article>
+      <article class="metric-card metric-green"><span>Donantes creados</span><strong>{{resultado.creados}}</strong><small>Con usuario nuevo</small></article>
+      <article class="metric-card metric-blue"><span>Donantes actualizados</span><strong>{{resultado.actualizados}}</strong><small>El correo ya existía</small></article>
+      <article class="metric-card{{#if resultado.hayErrores}} metric-red{{/if}}"><span>Filas con error</span><strong>{{resultado.cantidadErrores}}</strong><small>{{#if resultado.hayErrores}}No se importaron{{else}}Ninguna{{/if}}</small></article>
+    </div>
+    {{#if resultado.hayErrores}}
+    <h2 class="subtitulo">Filas que no se pudieron importar</h2>
+    <div class="table-wrap table-wrap-visible">
+      <table class="table-cards" role="table" aria-label="Filas con error">
+        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Línea del archivo</th><th role="columnheader" scope="col">Motivo</th></tr></thead>
+        <tbody role="rowgroup">
+          {{#each resultado.errores}}<tr role="row"><td role="cell" data-label="Línea">{{linea}}</td><td role="cell" data-label="Motivo">{{motivo}}</td></tr>{{/each}}
+        </tbody>
+      </table>
+    </div>
+    {{#if resultado.erroresOmitidos}}<p class="field-hint">Mostramos los primeros {{resultado.errores.length}} errores; hay {{resultado.erroresOmitidos}} más. Corregí el archivo y volvé a importarlo: las filas que ya entraron solo se actualizan, no se duplican.</p>{{/if}}
+    {{/if}}
+  </section>
+  {{/if}}
+
+  <div class="importar-grid">
+    <section class="surface-card section-block" aria-labelledby="importar-titulo">
+      <div class="section-heading"><div><h2 id="importar-titulo">Elegí el archivo</h2></div></div>
+      <form id="importar-form" class="ingreso-form" method="post" action="/admin/donaciones/importar" enctype="multipart/form-data" data-max-bytes="{{maxBytes}}" data-max-texto="{{maxTexto}}">
+        <div class="field{{#if errorArchivo}} tiene-error{{/if}}">
+          <label for="archivo-csv">Archivo CSV <span class="obligatorio" aria-hidden="true">*</span></label>
+          <input id="archivo-csv" class="input-archivo" name="file" type="file" accept=".csv,text/csv" required aria-describedby="archivo-ayuda archivo-error">
+          <p class="field-hint" id="archivo-ayuda">Formato .csv, con codificación UTF-8 y hasta {{maxTexto}}. La primera fila tiene que ser el encabezado.</p>
+          <p class="field-error" id="archivo-error" role="alert"{{#unless errorArchivo}} hidden{{/unless}}>{{errorArchivo}}</p>
+          <p class="archivo-elegido" id="archivo-elegido" hidden></p>
+        </div>
+        <div class="notice notice-info" id="importando" role="status" hidden>
+          <span class="button-spinner" aria-hidden="true"></span> Importando donantes… Los archivos grandes pueden tardar un par de minutos. No cierres ni recargues esta página.
+        </div>
+        <div class="acciones-form">
+          <a class="button button-outline" href="/plantillas/donantes-plantilla.csv" download>Descargar plantilla</a>
+          <button class="button button-primary" type="submit" data-busy-text="Importando…">Importar donantes</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="surface-card section-block" aria-labelledby="formato-titulo">
+      <div class="section-heading"><div><h2 id="formato-titulo">Formato del archivo</h2></div></div>
+      <p class="section-description">Una fila por donante, con estas seis columnas en este orden:</p>
+      <div class="table-wrap table-wrap-visible">
+        <table class="tabla-formato">
+          <caption class="visually-hidden">Columnas del archivo CSV</caption>
+          <thead><tr><th scope="col">Columna</th><th scope="col">Qué va</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">TipoPersona</th><td><code>HUMANA</code> o <code>JURIDICA</code></td></tr>
+            <tr><th scope="row">TipoDoc</th><td><code>DNI</code> o <code>CUIT</code></td></tr>
+            <tr><th scope="row">Documento</th><td>Ej.: <code>12345678</code> o <code>30-12345678-9</code></td></tr>
+            <tr><th scope="row">Nombre/Razón Social</th><td>Persona: nombre y apellido (<code>Ana Pérez</code>). Organización: su razón social.</td></tr>
+            <tr><th scope="row">Email</th><td>Obligatorio. Es la clave: define si se crea o se actualiza.</td></tr>
+            <tr><th scope="row">Teléfono</th><td>Opcional. Ej.: <code>+54 11 5555-5555</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="field-hint">Separá las columnas con coma o punto y coma. Las filas vacías se ignoran.</p>
+    </section>
+  </div>
+</div>
+<script type="module" src="/js/ingreso/comun.js"></script>
+<script type="module" src="/js/ingreso/importar.js"></script>

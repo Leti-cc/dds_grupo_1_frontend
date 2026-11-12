@@ -1,0 +1,93 @@
+<link rel="stylesheet" href="/css/ingreso.css">
+<div class="asignaciones ingreso">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Administración · Donaciones</p>
+      <h1>Registrar donación</h1>
+      <p class="lead">Cargá todo lo que trae el donante en una sola vez. El sistema agrupa los bienes por subcategoría y genera una donación independiente por cada grupo.</p>
+    </div>
+  </section>
+
+  {{> donaciones-tabs}}
+  {{> ingreso-pasos}}
+
+  {{#if servicioNoDisponible}}{{> asignaciones-no-disponible url=urlReintento}}{{/if}}
+  {{#if errorCarga}}<p class="notice notice-error" role="alert">{{errorCarga}}</p>{{/if}}
+  {{#if sinSubcategorias}}<p class="notice notice-info" role="alert">Todavía no hay subcategorías cargadas, así que no se pueden registrar bienes. Pedí que se carguen y volvé a intentar.</p>{{/if}}
+
+  {{#if hayFormulario}}
+  <aside class="hint" data-hint="ingreso-donacion" aria-label="Ayuda" hidden>
+    <p>Sumá un bien por cada producto distinto. Según la subcategoría te pedimos el vencimiento (perecederos) o si es nuevo o usado (muebles, ropa). Podés agregar hasta {{maxBienes}} bienes por carga.</p>
+    <button class="hint-close" type="button" aria-label="Cerrar ayuda" data-hint-close><span aria-hidden="true">×</span></button>
+  </aside>
+
+  <div class="ingreso-layout">
+    <div class="ingreso-principal">
+      {{> ingreso-errores}}
+      {{#if errorGeneral}}<p class="notice notice-error" role="alert">{{errorGeneral}}</p>{{/if}}
+
+      <form id="donacion-form" class="ingreso-form" method="post" action="{{urlAction}}" data-max-bienes="{{maxBienes}}">
+        <section class="surface-card section-block" aria-labelledby="general-titulo">
+          <div class="section-heading"><div><h2 id="general-titulo">Paso 2 · Datos generales</h2><p class="section-description">Los campos con <span class="obligatorio" aria-hidden="true">*</span><span class="visually-hidden">asterisco</span> son obligatorios.</p></div></div>
+          <div class="field{{#if errores.descripcion}} tiene-error{{/if}}">
+            <label for="descripcion">Descripción general de la donación <span class="obligatorio" aria-hidden="true">*</span></label>
+            <textarea id="descripcion" name="descripcion" rows="2" required maxlength="{{maxDescripcion}}" placeholder="Ej.: Mudanza de la oficina: muebles usados" aria-describedby="descripcion-ayuda{{#if errores.descripcion}} descripcion-error{{/if}}"{{#if errores.descripcion}} aria-invalid="true"{{/if}}>{{valores.descripcion}}</textarea>
+            <p class="field-hint" id="descripcion-ayuda">Una frase que explique de qué se trata. Hasta {{maxDescripcion}} caracteres.</p>
+            {{#if errores.descripcion}}<p class="field-error" id="descripcion-error">{{errores.descripcion}}</p>{{/if}}
+          </div>
+        </section>
+
+        <section class="surface-card section-block" aria-labelledby="bienes-titulo">
+          <div class="section-heading"><div><h2 id="bienes-titulo">Bienes</h2><p class="section-description">Un bien por producto distinto. Por ejemplo, “fideos” y “tomate triturado” son dos bienes.</p></div></div>
+          <div class="bienes-lista" id="bienes">
+            {{#each filas}}{{> ingreso-bien}}{{/each}}
+          </div>
+          <div class="agregar-bien">
+            <button class="button button-outline" type="button" id="agregar-bien" data-agregar-bien hidden>+ Agregar otro bien</button>
+            <p class="field-hint" id="agregar-bien-ayuda" hidden>Llegaste al máximo de {{maxBienes}} bienes por carga. Registrá el resto en otra carga.</p>
+          </div>
+        </section>
+
+        <div class="acciones-form acciones-sticky">
+          <a class="button button-outline" href="{{urlCambiarDonante}}">Cancelar</a>
+          <button class="button button-primary" type="submit" data-busy-text="Registrando…">Registrar donación</button>
+        </div>
+      </form>
+      <template id="bien-plantilla">{{> ingreso-bien filaPlantilla}}</template>
+    </div>
+
+    <aside class="ingreso-lateral" aria-label="Resumen de la carga">
+      <section class="surface-card donante-card" aria-labelledby="donante-titulo">
+        <p class="eyebrow">Donante</p>
+        <h2 id="donante-titulo">{{donante.nombre}}</h2>
+        <p><span class="tag {{donante.tipoClase}}">{{donante.tipoTexto}}</span></p>
+        <dl class="datos-donante">
+          <div><dt>{{donante.documentoEtiqueta}}</dt><dd>{{donante.documento}}</dd></div>
+          <div><dt>Correo</dt><dd>{{donante.email}}</dd></div>
+          {{#if donante.detalle}}<div><dt>Datos</dt><dd>{{donante.detalle}}</dd></div>{{/if}}
+        </dl>
+        <a class="text-link" href="{{urlCambiarDonante}}">Cambiar donante</a>
+      </section>
+
+      <section class="surface-card segmentacion" aria-labelledby="segmentacion-titulo">
+        <p class="eyebrow">Vista previa</p>
+        <h2 id="segmentacion-titulo">Así se va a segmentar</h2>
+        <div id="segmentacion" aria-live="polite" data-segmentacion>
+          <p class="section-description">Elegí la subcategoría de cada bien y acá ves cuántas donaciones se generan. Los bienes de una misma subcategoría quedan juntos.</p>
+        </div>
+        <p class="field-hint">Es una estimación: el resultado definitivo se confirma al registrar.</p>
+      </section>
+    </aside>
+  </div>
+  {{else}}
+  <section class="surface-card section-block">
+    <div class="empty-state compact">
+      <strong>No se puede cargar la donación ahora.</strong>
+      <span>Volvé a intentar en unos minutos o elegí otro donante.</span>
+      <a class="button button-outline" href="{{urlCambiarDonante}}">Volver a la búsqueda</a>
+    </div>
+  </section>
+  {{/if}}
+</div>
+<script type="module" src="/js/ingreso/comun.js"></script>
+{{#if hayFormulario}}<script type="module" src="/js/ingreso/donacion.js"></script>{{/if}}
