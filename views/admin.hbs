@@ -1,6 +1,13 @@
 <section class="page-heading dashboard-heading">
   <div><p class="eyebrow">Operación solidaria</p><h1>Administración y logística</h1><p class="lead">Consultá recursos de donaciones, transporte y donantes de la red.</p></div>
+  {{#if canManage}}
+  <div class="heading-actions">
+    <a class="button button-primary" href="#registrar-donante">+ Registrar donante</a>
+    <a class="button button-outline" href="/admin/donaciones/nueva">Registrar donación</a>
+  </div>
+  {{else}}
   <span class="tag tag-green">Panel de gestión</span>
+  {{/if}}
 </section>
 {{#if authMessage}}<p class="notice notice-info">{{authMessage}} <a href="/login">Ingresar</a></p>{{/if}}
 <section class="metric-grid">
@@ -74,15 +81,13 @@
   {{else if errors.notifications}}<div class="empty-state compact">No se pudo consultar el historial.</div>
   {{else}}<div class="empty-state compact">No hay notificaciones registradas.</div>{{/if}}
 </section>
-<section class="surface-card section-block">
-  <div class="section-heading"><div><p class="eyebrow">Alta</p><h2>Registrar donante</h2></div></div>
+<section class="surface-card section-block" id="registrar-donante" aria-labelledby="registrar-donante-titulo">
+  <div class="section-heading"><div><p class="eyebrow">Alta</p><h2 id="registrar-donante-titulo">Registrar donante</h2></div></div>
   {{#if canManage}}
   <form id="donor-form" class="form-grid" method="post" action="/administracion/donantes">
     <label class="field"><span>Tipo de persona</span><select name="tipo"><option value="HUMANA">Persona humana</option><option value="JURIDICA" {{selectedIf "JURIDICA" values.donor.tipo}}>Persona jurídica</option></select></label>
-    <label class="field"><span>Correo de contacto</span><input name="email" type="email" required value="{{values.donor.email}}"></label>
-    <label class="field"><span>Contraseña temporal</span><input name="contrasenaTemporal" type="password" minlength="8" autocomplete="new-password" required aria-describedby="password-help"></label>
-    <label class="field"><span>Confirmar contraseña</span><input name="confirmarContrasena" type="password" minlength="8" autocomplete="new-password" required></label>
-    <p id="password-help" class="form-full section-description">La persona donante deberá cambiar esta contraseña al iniciar sesión. Comunicásela por un canal seguro.</p>
+    <label class="field"><span>Correo de contacto</span><input name="email" type="email" required aria-describedby="password-help" value="{{values.donor.email}}"></label>
+    <p id="password-help" class="form-full section-description">Al registrarlo se genera una contraseña temporal y se envía a este correo. La persona donante deberá cambiarla la primera vez que inicie sesión.</p>
     <label class="field human-field"><span>Nombre</span><input name="nombre" value="{{values.donor.nombre}}"></label>
     <label class="field human-field"><span>Apellido</span><input name="apellido" value="{{values.donor.apellido}}"></label>
     <label class="field human-field"><span>DNI</span><input name="dni" inputmode="numeric" value="{{values.donor.dni}}"></label>

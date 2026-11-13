@@ -21,14 +21,8 @@
   </head>
   <body>
     <div class="page-progress" aria-hidden="true" hidden><span></span></div>
-{{#unless authPage}}<header class="topbar{{#if publicPage}} visitor-topbar{{/if}}">
-  <a class="brand" href="/" aria-label="DonaTrack, inicio">
-    <span class="brand-mark" aria-hidden="true"><svg class="visitor-icon visitor-brand-icon"><use href="/images/visitante/icons.svg#brand"></use></svg></span>
-    <span class="brand-copy">
-      <strong>DonaTrack</strong>
-      <small>Conectamos solidaridad</small>
-    </span>
-  </a>
+{{#unless authPage}}<header class="topbar">
+  {{> brand}}
   <button
     class="menu-toggle"
     type="button"
@@ -38,38 +32,26 @@
     data-action="toggle-navigation"
   >☰</button>
   <nav class="main-nav" id="primary-navigation" aria-label="Navegación principal">
-    {{#if publicPage}}
-      <a class="nav-link" href="/#como-funciona">Cómo funciona</a><a class="nav-link" href="/#impacto">Impacto</a><a class="nav-link" href="/#historias">Historias</a><a class="nav-link" href="/#contacto">Contacto</a>
-    {{else}}
     {{#each links}}
       <a href="{{href}}" {{#if active}}aria-current="page" class="nav-link is-active"{{else}}class="nav-link"{{/if}}>{{label}}</a>
     {{/each}}
-    {{/if}}
   </nav>
   <div class="topbar-actions">
     {{#if user}}
       <span class="user-chip">{{userLabel}}</span>
       <form method="post" action="/logout"><button class="button button-outline button-small" type="submit">Salir</button></form>
     {{else}}
-      {{#if publicPage}}<a class="button button-outline button-small" href="/login"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#login"></use></svg> Iniciar sesión</a><a class="button button-primary button-small" href="/registro"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#user"></use></svg> Registrarse</a>{{else}}<a class="button button-primary button-small" href="/login">Ingresar</a>{{/if}}
+      <a class="button button-outline button-small" href="/login"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#login"></use></svg> Iniciar sesión</a>
+      <a class="button button-primary button-small" href="/registro"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#user"></use></svg> Registrarse</a>
     {{/if}}
   </div>
 </header>
 {{/unless}}<main id="main-content" class="page-container{{#if authPage}} auth-main{{/if}}" tabindex="-1">
   {{{body}}}
 </main>
-{{#unless authPage}}<footer class="site-footer{{#if publicPage}} visitor-footer{{/if}}" id="contacto">
-  {{#if publicPage}}
+{{#unless authPage}}<footer class="site-footer visitor-footer" id="contacto">
+  {{> brand extraClass="brand-footer"}}
   <nav aria-label="Información"><a href="/#como-funciona">Sobre DonaTrack</a><a href="/#como-funciona">Cómo funciona</a><a href="/legal">Preguntas frecuentes</a><a href="/legal">Términos y condiciones</a><a href="/legal">Política de privacidad</a></nav><span>© 2026 DonaTrack. Todos los derechos reservados.</span><div class="visitor-social"><a href="/legal" aria-label="Facebook"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#facebook"></use></svg></a><a href="/legal" aria-label="Instagram"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#instagram"></use></svg></a><a href="/legal" aria-label="Correo"><svg class="visitor-icon" aria-hidden="true"><use href="/images/visitante/icons.svg#mail"></use></svg></a></div>
-  {{else}}
-  <a class="brand brand-footer" href="/">
-    <span class="brand-mark" aria-hidden="true"><svg class="visitor-icon visitor-brand-icon"><use href="/images/visitante/icons.svg#brand"></use></svg></span>
-    <span class="brand-copy"><strong>DonaTrack</strong><small>Red logística solidaria</small></span>
-  </a>
-  <span>Conectamos donaciones con comunidades.</span>
-  <a href="/galeria">Fotos de entregas</a>
-  <a href="/legal">Legal y privacidad</a>
-  {{/if}}
 </footer>
 {{/unless}}
     <div id="toast" class="toast" role="status" aria-live="polite"{{#if flash.toast}} data-state="{{flash.type}}"{{else}} hidden{{/if}}>{{flash.toast}}</div>

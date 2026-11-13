@@ -1,6 +1,7 @@
 import { Readable } from "node:stream";
 import { Router } from "express";
 import { ROLE_ALIASES, userHasRole } from "../middleware/auth.js";
+import { credencialesIniciales } from "../src/lib/contrasena-temporal.js";
 import { field, formErrorStatus, loadSection, readArray } from "../src/lib/page-data.js";
 import { authService } from "../src/services/auth-service.js";
 import { donatrackService } from "../src/services/donatrack-service.js";
@@ -141,13 +142,9 @@ function buildDonation(body) {
 function buildDonor(body) {
   const type = field(body, "tipo") === "JURIDICA" ? "JURIDICA" : "HUMANA";
   const email = field(body, "email");
-  const contrasenaTemporal = field(body, "contrasenaTemporal");
-  const confirmarContrasena = field(body, "confirmarContrasena");
   const errors = [];
   if (!email) errors.push("completá el correo de contacto");
   else if (!/^[^\s@]+@[^\s@]+$/.test(email)) errors.push("el correo no es válido");
-  if (contrasenaTemporal.length < 8) errors.push("la contraseña temporal debe tener al menos 8 caracteres");
-  if (contrasenaTemporal !== confirmarContrasena) errors.push("las contraseñas temporales no coinciden");
 
   if (type === "HUMANA") {
     const required = { nombre: "el nombre", apellido: "el apellido", dni: "el DNI", edad: "la edad", direccion: "la dirección" };
@@ -167,7 +164,6 @@ function buildDonor(body) {
         genero: field(body, "genero") || null,
         direccion: field(body, "direccion"),
         contactoPredeterminado: { medio: "MAIL", valor: email },
-        contrasenaTemporal,
       },
       error: validationMessage(errors),
     };
@@ -186,7 +182,6 @@ function buildDonor(body) {
       cuit: field(body, "cuit"),
       rubro: field(body, "rubro"),
       contactoPredeterminado: { medio: "MAIL", valor: email },
-      contrasenaTemporal,
     },
     error: validationMessage(errors),
   };
@@ -244,11 +239,15 @@ router.post("/administracion/donantes", async (req, res) => {
     return renderAdminWithError(req, res, "donor", 400, error);
   }
   try {
-    await donatrackService.createDonor(req, donor);
+    // La contraseña temporal se genera acá (el admin no la elige ni la ve) y el backend la envía por mail.
+    await donatrackService.createDonor(req, { ...donor, ...credencialesIniciales() });
   } catch (apiError) {
     return renderAdminWithError(req, res, "donor", formErrorStatus(apiError), apiError.message);
   }
-  req.flash({ type: "success", toast: "Donante registrado." });
+  req.flash({
+    type: "success",
+    toast: `Donante registrado. Le enviamos una contraseña temporal a ${donor.contactoPredeterminado.valor}.`,
+  });
   return res.redirect("/administracion");
 });
 
