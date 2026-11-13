@@ -100,3 +100,29 @@ export function simularRespuestaPlanificador(req, rutas) {
     "No se pudo simular la respuesta del optimizador.",
   );
 }
+
+export function cambiarEstadoEntrega(req, id, {nuevoEstado, fotoUrl, motivo}) {
+
+  const parametros = new URLSearchParams({ nuevoEstado });
+  if (fotoUrl) parametros.set("fotoUrl", fotoUrl);
+  if (motivo) parametros.set("motivo", motivo);
+  return llamar(req, `/entregas/${segmento(id)}/estado?${parametros}`, {method: "PUT"}, {
+
+    400: "La entrega ya no puede cambiar a ese estado.",
+    default: "No se pudo registrar la recepción.",
+
+  });
+}
+
+export async function entregaEnTrasladoDeDonacion(req, donacionId) {
+  
+  const entregas = await listarEntregas(req, "EN_TRASLADO");
+
+  const propias = (Array.isArray(entregas) ? entregas : []).filter(
+
+    (entrega) => String(entrega.donacionId) === String(donacionId),
+
+  );
+  
+  return propias.at(-1) ?? null;
+}

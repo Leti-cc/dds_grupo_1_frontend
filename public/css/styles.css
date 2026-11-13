@@ -751,6 +751,37 @@ h3 {
   outline: 3px solid rgb(0 74 198 / 16%);
 }
 
+.field textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 10px 13px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--outline);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.field textarea:focus {
+  border-color: var(--primary);
+  outline: 3px solid rgb(0 74 198 / 16%);
+}
+
+.galeria-entrega {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.galeria-entrega img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 9px;
+}
+
 .field-hint {
   margin: 12px 0 0;
   color: var(--muted);

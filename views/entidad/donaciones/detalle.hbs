@@ -38,5 +38,59 @@
       <p class="muted">El servicio todavía no informa la fecha de cada cambio de estado.</p>
     </section>
   </div>
+
+  {{#if donacion.fotos.length}}
+  <section class="surface-card" aria-labelledby="fotos-titulo">
+    <h2 id="fotos-titulo">Fotos de la entrega</h2>
+    <div class="galeria-entrega">
+      {{#each donacion.fotos}}
+      <a href="{{this}}" target="_blank" rel="noopener"><img src="{{this}}" alt="Foto de la donación recibida" loading="lazy" width="160"></a>
+      {{/each}}
+    </div>
+  </section>
   {{/if}}
+
+  {{#if donacion.enTraslado}}
+  <section class="surface-card" aria-labelledby="recepcion-titulo">
+    <h2 id="recepcion-titulo">¿Llegó la donación?</h2>
+    <p class="muted">Confirmá la recepción con fotos o avisanos si no llegó.</p>
+    <div class="dialog-actions">
+      <button class="button button-outline" type="button" data-dialog-open="dlg-no-recibida">No la recibí</button>
+      <button class="button button-primary" type="button" data-dialog-open="dlg-recibida">Confirmar recepción</button>
+    </div>
+  </section>
+
+  <dialog class="dialog" id="dlg-recibida" aria-labelledby="dlg-recibida-t" aria-describedby="dlg-recibida-d">
+    <h2 id="dlg-recibida-t">Confirmar recepción</h2>
+    <form method="post" enctype="multipart/form-data" action="/entidad/donaciones/{{id}}/recepcion">
+      <input type="hidden" name="volver" value="{{volver}}">
+      <p id="dlg-recibida-d">Subí hasta 3 fotos (JPG, PNG o WebP, máx. 5 MB cada una).</p>
+      <label class="field"><span>Fotos de la donación</span>
+        <input type="file" name="fotos" accept="image/jpeg,image/png,image/webp" multiple required></label>
+      <div class="dialog-actions">
+        <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+        <button class="button button-primary" type="submit" data-busy-text="Enviando…">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="dlg-no-recibida" aria-labelledby="dlg-no-t" aria-describedby="dlg-no-d">
+    <h2 id="dlg-no-t">No recibí la donación</h2>
+    <form method="post" action="/entidad/donaciones/{{id}}/no-recibida">
+      <input type="hidden" name="volver" value="{{volver}}">
+      <p id="dlg-no-d">La administración va a revisar el caso.</p>
+      <label class="field"><span>Motivo</span>
+        <textarea name="motivo" rows="3" maxlength="250" required placeholder="Ej.: nadie atendió en el horario"></textarea></label>
+      <div class="dialog-actions">
+        <button class="button button-outline" type="button" data-dialog-close>Cancelar</button>
+        <button class="button button-primary" type="submit" data-busy-text="Enviando…">Enviar</button>
+      </div>
+    </form>
+  </dialog>
+  {{/if}}
+
+  {{/if}}
+
 </div>
+
+<script type="module" src="/js/logistica/modales.js"></script>
