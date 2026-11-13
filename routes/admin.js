@@ -1,12 +1,14 @@
 import { Readable } from "node:stream";
 import { Router } from "express";
 import { ROLE_ALIASES, userHasRole } from "../middleware/auth.js";
+import { credencialesIniciales } from "../src/lib/contrasena-temporal.js";
 import { field, formErrorStatus, loadSection, readArray } from "../src/lib/page-data.js";
 import { authService } from "../src/services/auth-service.js";
 import { donatrackService } from "../src/services/donatrack-service.js";
 
 const router = Router();
 const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+const PERIODO_VALIDO = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 function isAdminSession(session) {
   return Boolean(session) && userHasRole(session.user, ROLE_ALIASES.ADMIN);
@@ -26,11 +28,16 @@ async function loadAdminPage(req) {
       trucks: [],
       notifications: [],
       subcategories: [],
+      ranking: null,
+      rankingPeriods: [],
+      rankingPeriod: "ultimo",
       metrics: { donations: "—", donors: "—", trucks: "—", pending: "—" },
     };
   }
 
-  const [donations, donors, trucks, pendingDeliveries, subcategories, notifications] = await Promise.all([
+  const requestedPeriod = field(req.query, "periodo");
+  const rankingPeriod = PERIODO_VALIDO.test(requestedPeriod) ? requestedPeriod : "ultimo";
+  const [donations, donors, trucks, pendingDeliveries, subcategories, notifications, rankingPeriods, ranking] = await Promise.all([
     loadSection(
       () => donatrackService.getDonations(req),
       (value) => readArray(value, "donaciones"),
@@ -55,6 +62,11 @@ async function loadAdminPage(req) {
       () => donatrackService.getNotifications(req),
       (value) => readArray(value, "notificaciones"),
     ),
+    loadSection(
+      () => donatrackService.getRankingPeriods(req),
+      (value) => readArray(value, "períodos de ranking"),
+    ),
+    loadSection(() => donatrackService.getDonorRanking(req, rankingPeriod)),
   ]);
   const donorList = donors.data ?? [];
   return {
@@ -70,6 +82,9 @@ async function loadAdminPage(req) {
     trucks: trucks.data ?? [],
     notifications: notifications.data ?? [],
     subcategories: subcategories.data ?? [],
+    ranking: ranking.data ?? null,
+    rankingPeriod,
+    rankingPeriods: rankingPeriods.data ?? [],
     metrics: {
       donations: donations.error ? "—" : donations.data.length,
       donors: donors.error ? "—" : donors.data.length,
@@ -83,6 +98,8 @@ async function loadAdminPage(req) {
       deliveries: pendingDeliveries.error,
       subcategories: subcategories.error,
       notifications: notifications.error,
+      rankingPeriods: rankingPeriods.error,
+      ranking: ranking.error,
     },
   };
 }
@@ -222,11 +239,15 @@ router.post("/administracion/donantes", async (req, res) => {
     return renderAdminWithError(req, res, "donor", 400, error);
   }
   try {
-    await donatrackService.createDonor(req, donor);
+    // La contraseña temporal se genera acá (el admin no la elige ni la ve) y el backend la envía por mail.
+    await donatrackService.createDonor(req, { ...donor, ...credencialesIniciales() });
   } catch (apiError) {
     return renderAdminWithError(req, res, "donor", formErrorStatus(apiError), apiError.message);
   }
-  req.flash({ type: "success", toast: "Donante registrado." });
+  req.flash({
+    type: "success",
+    toast: `Donante registrado. Le enviamos una contraseña temporal a ${donor.contactoPredeterminado.valor}.`,
+  });
   return res.redirect("/administracion");
 });
 

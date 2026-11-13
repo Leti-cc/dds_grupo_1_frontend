@@ -40,7 +40,7 @@
         {{> ingreso-campo id="cuit" name="cuit" label="CUIT" value=valores.cuit error=errores.cuit required=true maxlength=13 inputmode="numeric" placeholder="30-12345678-9" hint="Con o sin guiones." autocomplete="off"}}
         {{> ingreso-campo id="rubro" name="rubro" label="Rubro" value=valores.rubro error=errores.rubro required=true maxlength=80 placeholder="Ej.: Alimentos, Textil, Educación" autocomplete="off"}}
       {{/if}}
-      {{> ingreso-campo id="email" name="email" label="Correo electrónico" value=valores.email error=errores.email required=true type="email" maxlength=120 placeholder="nombre@dominio.com" hint="Es el medio de contacto para las notificaciones y para avisarle que ya puede ingresar." autocomplete="off" class="form-full"}}
+      {{> ingreso-campo id="email" name="email" label="Correo electrónico" value=valores.email error=errores.email required=true type="email" maxlength=120 placeholder="nombre@dominio.com" hint="Le enviamos a este correo una contraseña temporal para su primer ingreso (deberá cambiarla). También se usa para las notificaciones." autocomplete="off" class="form-full"}}
 
       <div class="form-full acciones-form">
         <a class="button button-outline" href="{{urlVolver}}">Cancelar</a>

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { credencialesIniciales } from "../src/lib/contrasena-temporal.js";
 import { leerMultipart } from "../src/lib/multipart.js";
 import { formErrorStatus } from "../src/lib/page-data.js";
 import {
@@ -109,7 +110,7 @@ function renderAlta(res, status, { tipo, valores = {}, errores = {}, errorGenera
   const esJuridica = tipo === "JURIDICA";
   return res.status(status).render("admin/ingreso/registrar-donante", {
     title: "Registrar donante · Donaciones",
-    tab: "nueva",
+    tab: "donante",
     pasos: pasosIngreso(1),
     esHumana: !esJuridica,
     esJuridica,
@@ -135,7 +136,8 @@ router.post("/nueva/donante", async (req, res) => {
 
   let creado;
   try {
-    creado = await ingreso.crearDonante(req, donante);
+    // Contraseña temporal generada acá; el backend crea la cuenta y la envía al correo del donante.
+    creado = await ingreso.crearDonante(req, { ...donante, ...credencialesIniciales() });
   } catch (error) {
     return renderAlta(res, formErrorStatus(error), {
       tipo: valores.tipo,
@@ -144,12 +146,16 @@ router.post("/nueva/donante", async (req, res) => {
     });
   }
 
+  const avisoMail = `Le enviamos una contraseña temporal a ${valores.email}.`;
   const donanteId = leerId(creado?.id);
   if (!donanteId) {
-    req.flash({ type: "success", toast: "Donante registrado. Buscalo para cargar su donación." });
+    req.flash({ type: "success", toast: `Donante registrado. ${avisoMail} Buscalo para cargar su donación.` });
     return res.redirect(URL_BUSCAR);
   }
-  req.flash({ type: "success", toast: `Donante registrado: ${vistaDonante(creado).nombre}. Ahora cargá su donación.` });
+  req.flash({
+    type: "success",
+    toast: `Donante registrado: ${vistaDonante(creado).nombre}. ${avisoMail} Ahora cargá su donación.`,
+  });
   return res.redirect(urlCargarDonacion(donanteId));
 });
 

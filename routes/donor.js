@@ -9,7 +9,9 @@ const router = Router();
 async function loadDonorPage(req) {
   const session = authService.getSession(req);
   const user = session?.user;
-  const username = user?.username ?? user?.nombreUsuario;
+  // Incentivos identifica al donante por el nombre que arma Donaciones (se resuelve en el callback de login),
+  // no por el usuario de Keycloak (que es el email).
+  const username = user?.incentivosUsuario ?? user?.nombreUsuario;
   if (!user || !userHasRole(user, ROLE_ALIASES.DONANTE)) {
     return {
       userName: "",
@@ -27,7 +29,7 @@ async function loadDonorPage(req) {
   if (!username) {
     return {
       userName: "",
-      authMessage: "El perfil autenticado no incluye nombreUsuario para consultar incentivos.",
+      authMessage: "Tu cuenta todavía no está asociada a un donante con donaciones registradas en DonaTrack.",
       profile: {
         donations: "—",
         donationHistory: [],

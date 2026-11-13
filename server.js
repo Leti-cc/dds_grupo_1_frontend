@@ -6,7 +6,7 @@ import express from "express";
 import { engine } from "express-handlebars";
 import session from "express-session";
 import { flash } from "./middleware/flash.js";
-import { requireRole } from "./middleware/auth.js";
+import { refreshSession, requireRole } from "./middleware/auth.js";
 import { layoutLocals } from "./middleware/locals.js";
 import adminRoutes from "./routes/admin.js";
 import asignacionesRoutes from "./routes/asignaciones.js";
@@ -23,6 +23,12 @@ import { helpers } from "./src/helpers/handlebars.js";
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+
+app.use((req, res, next) => {
+  console.log(`[request] ${req.method} ${req.originalUrl}`);
+  res.on("finish", () => console.log(`[response] ${res.statusCode} ${req.method} ${req.originalUrl}`));
+  next();
+});
 
 app.engine(
   ".hbs",
@@ -61,13 +67,17 @@ app.use(
     cookie: { httpOnly: true, sameSite: "lax" },
   }),
 );
+app.use(refreshSession);
 app.use(flash);
 app.use(layoutLocals);
 
 app.use(publicRoutes);
 app.use(authRoutes);
+app.use("/donante", requireRole("DONANTE"));
 app.use(donorRoutes);
+app.use("/entidad", requireRole("ENTIDAD"));
 app.use(entityRoutes);
+app.use("/administracion", requireRole("ADMIN"));
 app.use(adminRoutes);
 app.use("/admin/logistica", requireRole("ADMIN"), logisticaRoutes);
 // Flujo 3 (ingreso): va ANTES que asignaciones, cuya ruta /:id se llevaría /nueva e /importar.

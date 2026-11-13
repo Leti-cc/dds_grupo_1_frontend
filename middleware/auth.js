@@ -1,4 +1,18 @@
 import { AUTH_DEV_BYPASS } from "../src/config.js";
+import { authService } from "../src/services/auth-service.js";
+
+/**
+ * Renueva el access token de Keycloak antes de que venza, así las APIs nunca reciben un token expirado.
+ * Va después de express-session y antes de las rutas.
+ */
+export async function refreshSession(req, res, next) {
+  try {
+    await authService.refreshIfNeeded(req);
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
 
 /**
  * Alias de rol: el backend de autenticación todavía no fijó los nombres definitivos,
@@ -27,11 +41,9 @@ function expandRoles(roles) {
 }
 
 /**
- * Middleware provisorio de autorización por rol.
- *
- * TODO: reemplazar cuando el servicio de autenticación defina su contrato definitivo
- * (roles, expiración y renovación del token). Con AUTH_DEV_BYPASS=true en .env se saltea
- * el chequeo para poder desarrollar sin backend de auth; nunca activarlo en producción.
+ * Autorización por rol a partir de la sesión creada en el callback OIDC (roles del realm de Keycloak).
+ * Con AUTH_DEV_BYPASS=true en .env se saltea el chequeo para desarrollar sin Keycloak;
+ * nunca activarlo en producción.
  */
 export function requireRole(...roles) {
   const allowedRoles = expandRoles(roles);
