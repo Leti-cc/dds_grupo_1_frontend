@@ -1,34 +1,28 @@
-<section class="login-layout">
-  <div class="surface-card login-card">
-    <p class="eyebrow">Acceso seguro</p>
-    <h1>Ingresá a DonaTrack</h1>
-    <p class="section-description">Usá las credenciales de tu organización para acceder a las herramientas de la red.</p>
-
-    <div class="social-login" aria-label="Opciones de inicio de sesión social">
-      <a class="button button-social" href="/login/google">Continuar con Google <span aria-hidden="true">→</span></a>
-      <a class="button button-social" href="/login/microsoft">Continuar con Microsoft <span aria-hidden="true">→</span></a>
-      <a class="button button-social" href="/login/institucional">Cuenta institucional <span class="tag tag-violet">SSO</span></a>
-    </div>
-    {{#if authError}}<p class="notice notice-error" role="alert">{{authError}}</p>{{/if}}
-
-    <div class="form-divider"><span>O ingresá con tus credenciales</span></div>
-    <form id="login-form" class="form-stack" method="post" action="/login">
-      <label class="field"><span>Correo electrónico, usuario o CUIT/CUIL</span><input name="identifier" type="text" autocomplete="username" placeholder="nombre@organizacion.org" required minlength="3" value="{{values.login.identifier}}"></label>
-      <label class="field"><span>Contraseña</span><span class="password-control"><input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required minlength="1"><button class="password-toggle" type="button" data-action="toggle-password" aria-label="Mostrar contraseña">Ver</button></span></label>
-      <label class="checkbox-field"><input name="remember" type="checkbox"{{#if values.login.remember}} checked{{/if}}><span>Recordar mi sesión en este dispositivo</span></label>
-      <p class="notice notice-info">El servicio de autenticación del backend está pendiente de exponer su endpoint. El formulario muestra el flujo esperado y se conecta cuando esté configurado.</p>
-      <p id="login-error" class="notice notice-error" role="alert" {{#unless formErrors.login}}hidden{{/unless}}>{{formErrors.login}}</p>
-      <button class="button button-primary button-wide" type="submit">Iniciar sesión <span aria-hidden="true">→</span></button>
-    </form>
-    {{#if user}}<form method="post" action="/logout"><button class="button button-outline button-wide" type="submit">Cerrar sesión actual</button></form>{{/if}}
-  </div>
-  <aside class="login-aside">
-    <span class="eyebrow">DonaTrack · Red solidaria</span>
-    <h2>Una plataforma para coordinar, acompañar y transparentar cada entrega.</h2>
-    <ul class="feature-list">
-      <li><span class="icon-tile" aria-hidden="true">✓</span><span><strong>Acceso por perfil</strong><small>Donantes, entidades y administración.</small></span></li>
-      <li><span class="icon-tile icon-green" aria-hidden="true">↗</span><span><strong>Información conectada</strong><small>Datos consumidos desde las APIs existentes.</small></span></li>
-      <li><span class="icon-tile icon-violet" aria-hidden="true">⌁</span><span><strong>Inicio federado</strong><small>Listo para integrar proveedores SSO.</small></span></li>
-    </ul>
+<div class="auth-shell">
+  <aside class="auth-story">
+    <a class="brand auth-brand" href="/" aria-label="DonaTrack, volver al inicio"><span class="brand-mark" aria-hidden="true"><svg class="visitor-icon visitor-brand-icon"><use href="/images/visitante/icons.svg#brand"></use></svg></span><span class="brand-copy"><strong>DonaTrack</strong><small>Conectamos solidaridad</small></span></a>
+    <div class="auth-story-copy"><h2>Bienvenidas las personas y entidades que transforman vidas</h2><p>Iniciá sesión para seguir tus donaciones, gestionar las necesidades de tu entidad o administrar la plataforma.</p></div>
+    <img class="auth-illustration" src="/images/visitante/login-ilustracion.png" alt="Caja de donaciones solidarias">
   </aside>
-</section>
+  <section class="auth-form-pane" aria-labelledby="login-title">
+    <div class="auth-form-content">
+      <h1 id="login-title">Iniciar sesión</h1>
+      <p class="auth-subtitle">Accedé de forma segura con tu cuenta de DonaTrack</p>
+      {{#if authError}}<p class="notice notice-error" role="alert">{{authError}}</p>{{/if}}
+      {{#if ssoLogoutUrl}}<p><a href="{{ssoLogoutUrl}}">Cerrar la sesión e ingresar con otra cuenta</a></p>{{/if}}
+      <div class="form-stack">
+        <a class="button button-primary button-wide" href="/auth/start">Continuar al ingreso seguro</a>
+      </div>
+      {{#if socialProviders.length}}
+        <p class="auth-divider">o ingresá como donante con</p>
+        <div class="auth-social">
+          {{#each socialProviders}}
+            <a class="button button-outline" href="/auth/start?provider={{alias}}">Continuar con {{name}}</a>
+          {{/each}}
+        </div>
+      {{/if}}
+      <p class="auth-register-prompt">¿No tenés cuenta? <a href="/registro">Registrá tu organización</a></p>
+    </div>
+  </section>
+  <footer class="auth-footer"><span>© 2026 DonaTrack</span><nav aria-label="Información"><a href="/legal">Términos y condiciones</a><a href="/legal">Política de privacidad</a><a href="/legal">Ayuda</a></nav></footer>
+</div>

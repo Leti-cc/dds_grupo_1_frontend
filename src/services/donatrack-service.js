@@ -5,6 +5,15 @@ export const donatrackService = {
     apiRequest(req, "donaciones", `/api/donaciones${toQueryString(params)}`),
   getEntities: (req) =>
     apiRequest(req, "donaciones", "/api/entidades-beneficiarias"),
+  createEntity: (req, entity) =>
+    apiRequest(req, "donaciones", "/api/entidades-beneficiarias", {
+      method: "POST",
+      body: entity,
+    }),
+  getEntityByIdentity: (req, keycloakUserId) =>
+    apiRequest(req, "donaciones", `/api/entidades-beneficiarias/por-identidad/${encodeURIComponent(keycloakUserId)}`),
+  getDonorByIdentity: (req, keycloakUserId) =>
+    apiRequest(req, "donaciones", `/api/donantes/por-identidad/${encodeURIComponent(keycloakUserId)}`),
   getNeeds: (req, params = {}) =>
     apiRequest(req, "donaciones", `/api/necesidades${toQueryString(params)}`),
   getSubcategories: (req) => apiRequest(req, "donaciones", "/api/subcategorias"),
@@ -57,8 +66,10 @@ export const donatrackService = {
       "incentivos",
       `/api/incentivos/donantes/${encodeURIComponent(username)}/vitrina`,
     ),
-  getDonorRanking: (req) =>
-    apiRequest(req, "incentivos", "/api/incentivos/rankings/ultimo/destacados"),
+  getRankingPeriods: (req) =>
+    apiRequest(req, "incentivos", "/api/incentivos/rankings"),
+  getDonorRanking: (req, period = "ultimo") =>
+    apiRequest(req, "incentivos", `/api/incentivos/rankings/${encodeURIComponent(period)}/destacados`),
 };
 
 function toQueryString(params) {

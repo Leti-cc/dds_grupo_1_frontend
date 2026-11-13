@@ -7,6 +7,7 @@ import { donatrackService } from "../src/services/donatrack-service.js";
 
 const router = Router();
 const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+const PERIODO_VALIDO = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 function isAdminSession(session) {
   return Boolean(session) && userHasRole(session.user, ROLE_ALIASES.ADMIN);
@@ -26,11 +27,16 @@ async function loadAdminPage(req) {
       trucks: [],
       notifications: [],
       subcategories: [],
+      ranking: null,
+      rankingPeriods: [],
+      rankingPeriod: "ultimo",
       metrics: { donations: "—", donors: "—", trucks: "—", pending: "—" },
     };
   }
 
-  const [donations, donors, trucks, pendingDeliveries, subcategories, notifications] = await Promise.all([
+  const requestedPeriod = field(req.query, "periodo");
+  const rankingPeriod = PERIODO_VALIDO.test(requestedPeriod) ? requestedPeriod : "ultimo";
+  const [donations, donors, trucks, pendingDeliveries, subcategories, notifications, rankingPeriods, ranking] = await Promise.all([
     loadSection(
       () => donatrackService.getDonations(req),
       (value) => readArray(value, "donaciones"),
@@ -55,6 +61,11 @@ async function loadAdminPage(req) {
       () => donatrackService.getNotifications(req),
       (value) => readArray(value, "notificaciones"),
     ),
+    loadSection(
+      () => donatrackService.getRankingPeriods(req),
+      (value) => readArray(value, "períodos de ranking"),
+    ),
+    loadSection(() => donatrackService.getDonorRanking(req, rankingPeriod)),
   ]);
   const donorList = donors.data ?? [];
   return {
@@ -70,6 +81,9 @@ async function loadAdminPage(req) {
     trucks: trucks.data ?? [],
     notifications: notifications.data ?? [],
     subcategories: subcategories.data ?? [],
+    ranking: ranking.data ?? null,
+    rankingPeriod,
+    rankingPeriods: rankingPeriods.data ?? [],
     metrics: {
       donations: donations.error ? "—" : donations.data.length,
       donors: donors.error ? "—" : donors.data.length,
@@ -83,6 +97,8 @@ async function loadAdminPage(req) {
       deliveries: pendingDeliveries.error,
       subcategories: subcategories.error,
       notifications: notifications.error,
+      rankingPeriods: rankingPeriods.error,
+      ranking: ranking.error,
     },
   };
 }
@@ -125,9 +141,13 @@ function buildDonation(body) {
 function buildDonor(body) {
   const type = field(body, "tipo") === "JURIDICA" ? "JURIDICA" : "HUMANA";
   const email = field(body, "email");
+  const contrasenaTemporal = field(body, "contrasenaTemporal");
+  const confirmarContrasena = field(body, "confirmarContrasena");
   const errors = [];
   if (!email) errors.push("completá el correo de contacto");
   else if (!/^[^\s@]+@[^\s@]+$/.test(email)) errors.push("el correo no es válido");
+  if (contrasenaTemporal.length < 8) errors.push("la contraseña temporal debe tener al menos 8 caracteres");
+  if (contrasenaTemporal !== confirmarContrasena) errors.push("las contraseñas temporales no coinciden");
 
   if (type === "HUMANA") {
     const required = { nombre: "el nombre", apellido: "el apellido", dni: "el DNI", edad: "la edad", direccion: "la dirección" };
@@ -147,6 +167,7 @@ function buildDonor(body) {
         genero: field(body, "genero") || null,
         direccion: field(body, "direccion"),
         contactoPredeterminado: { medio: "MAIL", valor: email },
+        contrasenaTemporal,
       },
       error: validationMessage(errors),
     };
@@ -165,6 +186,7 @@ function buildDonor(body) {
       cuit: field(body, "cuit"),
       rubro: field(body, "rubro"),
       contactoPredeterminado: { medio: "MAIL", valor: email },
+      contrasenaTemporal,
     },
     error: validationMessage(errors),
   };
