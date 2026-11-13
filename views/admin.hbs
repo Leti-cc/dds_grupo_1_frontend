@@ -14,6 +14,7 @@
 {{#if errors.trucks}}<p class="notice notice-error">{{errors.trucks}}</p>{{/if}}
 {{#if errors.deliveries}}<p class="notice notice-error">{{errors.deliveries}}</p>{{/if}}
 {{#if errors.subcategories}}<p class="notice notice-error">{{errors.subcategories}}</p>{{/if}}
+{{#if errors.rankingPeriods}}<p class="notice notice-error">{{errors.rankingPeriods}}</p>{{/if}}
 <section class="dashboard-grid admin-grid">
   <div class="surface-card">
     <div class="section-heading"><div><p class="eyebrow">Inventario de la red</p><h2>Donaciones recientes</h2></div>{{#if canManage}}<button class="button button-primary button-small" type="button" data-action="toggle-donation-form">Registrar donación</button>{{/if}}</div>
@@ -50,6 +51,22 @@
     {{else}}<div class="empty-state compact">No hay camiones para mostrar.</div>{{/if}}
   </div>
 </section>
+<section class="surface-card section-block" aria-labelledby="ranking-titulo">
+  <div class="section-heading"><div><p class="eyebrow">Incentivos</p><h2 id="ranking-titulo">Ranking mensual de donantes</h2></div></div>
+  <form class="inline-form" method="get" action="/administracion">
+    <label class="field grow"><span>Período</span><select name="periodo">
+      <option value="ultimo" {{selectedIf "ultimo" rankingPeriod}}>Último período procesado</option>
+      {{#each rankingPeriods}}<option value="{{this}}" {{selectedIf this ../rankingPeriod}}>{{this}}</option>{{/each}}
+    </select></label>
+    <button class="button button-outline" type="submit">Consultar</button>
+  </form>
+  {{#if errors.ranking}}<p class="notice notice-error" role="alert">{{errors.ranking}}</p>
+  {{else if ranking}}
+    <p class="section-description">Podio de {{ranking.periodoMes}}. Se ordena por misiones cumplidas durante el mes.</p>
+    {{#if ranking.losDestacados.length}}<ol class="data-list">{{#each ranking.losDestacados}}<li><div><strong>#{{puesto}} · {{nombreUsuario}}</strong><small>{{misionesLogradas}} misiones cumplidas</small></div><span class="tag tag-violet">Puesto {{puesto}}</span></li>{{/each}}</ol>
+    {{else}}<div class="empty-state compact">No hubo donantes con actividad para este período.</div>{{/if}}
+  {{else}}<div class="empty-state compact">Todavía no hay rankings procesados.</div>{{/if}}
+</section>
 <section class="surface-card section-block">
   <div class="section-heading"><div><p class="eyebrow">Actividad de la red</p><h2>Historial de notificaciones</h2></div></div>
   {{#if errors.notifications}}<p class="notice notice-error">{{errors.notifications}}</p>{{/if}}
@@ -63,6 +80,9 @@
   <form id="donor-form" class="form-grid" method="post" action="/administracion/donantes">
     <label class="field"><span>Tipo de persona</span><select name="tipo"><option value="HUMANA">Persona humana</option><option value="JURIDICA" {{selectedIf "JURIDICA" values.donor.tipo}}>Persona jurídica</option></select></label>
     <label class="field"><span>Correo de contacto</span><input name="email" type="email" required value="{{values.donor.email}}"></label>
+    <label class="field"><span>Contraseña temporal</span><input name="contrasenaTemporal" type="password" minlength="8" autocomplete="new-password" required aria-describedby="password-help"></label>
+    <label class="field"><span>Confirmar contraseña</span><input name="confirmarContrasena" type="password" minlength="8" autocomplete="new-password" required></label>
+    <p id="password-help" class="form-full section-description">La persona donante deberá cambiar esta contraseña al iniciar sesión. Comunicásela por un canal seguro.</p>
     <label class="field human-field"><span>Nombre</span><input name="nombre" value="{{values.donor.nombre}}"></label>
     <label class="field human-field"><span>Apellido</span><input name="apellido" value="{{values.donor.apellido}}"></label>
     <label class="field human-field"><span>DNI</span><input name="dni" inputmode="numeric" value="{{values.donor.dni}}"></label>

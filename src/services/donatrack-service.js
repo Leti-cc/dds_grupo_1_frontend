@@ -64,8 +64,10 @@ export const donatrackService = {
       "incentivos",
       `/api/incentivos/donantes/${encodeURIComponent(username)}/vitrina`,
     ),
-  getDonorRanking: (req) =>
-    apiRequest(req, "incentivos", "/api/incentivos/rankings/ultimo/destacados"),
+  getRankingPeriods: (req) =>
+    apiRequest(req, "incentivos", "/api/incentivos/rankings"),
+  getDonorRanking: (req, period = "ultimo") =>
+    apiRequest(req, "incentivos", `/api/incentivos/rankings/${encodeURIComponent(period)}/destacados`),
 };
 
 function toQueryString(params) {

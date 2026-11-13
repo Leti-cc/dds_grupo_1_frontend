@@ -24,6 +24,12 @@ const DONACIONES_LINK = {
   label: "Donaciones",
 };
 
+const RANKINGS_LINK = {
+  path: "/administracion?periodo=ultimo#ranking-titulo",
+  activePrefix: "/administracion",
+  label: "Rankings",
+};
+
 function userLabel(user) {
   return user?.nombre ?? user?.username ?? user?.email ?? "Sesión iniciada";
 }
@@ -41,7 +47,7 @@ export function layoutLocals(req, res, next) {
   res.locals.user = user;
   res.locals.userLabel = userLabel(user);
   const canSeeLogistica = AUTH_DEV_BYPASS || userHasRole(user, ROLE_ALIASES.ADMIN);
-  const navigation = canSeeLogistica ? [...NAVIGATION, DONACIONES_LINK, LOGISTICA_LINK] : NAVIGATION;
+  const navigation = canSeeLogistica ? [...NAVIGATION, DONACIONES_LINK, LOGISTICA_LINK, RANKINGS_LINK] : NAVIGATION;
   res.locals.links = navigation.map((item) => ({
     ...item,
     href: item.path,
