@@ -14,9 +14,18 @@ test("una persona donante no ve entidad ni administración", () => {
   assert.deepEqual(links, [...PUBLICOS, "Donante"]);
 });
 
-test("una entidad solo suma su pestaña", () => {
+test("una entidad solo suma sus pestañas", () => {
   const links = etiquetas(navigationFor({ role: "ENTIDAD_BENEFICIARIA" }, "/", { bypass: false }));
-  assert.deepEqual(links, [...PUBLICOS, "Entidad"]);
+  assert.deepEqual(links, [...PUBLICOS, "Entidad", "Donaciones asignadas"]);
+});
+
+test("en las donaciones de la entidad se marca solo esa pestaña, no también Entidad", () => {
+  const entidad = { role: "ENTIDAD" };
+  const activas = (ruta) =>
+    navigationFor(entidad, ruta, { bypass: false }).filter((link) => link.active).map((link) => link.label);
+  assert.deepEqual(activas("/entidad/donaciones"), ["Donaciones asignadas"]);
+  assert.deepEqual(activas("/entidad/donaciones/12"), ["Donaciones asignadas"]);
+  assert.deepEqual(activas("/entidad"), ["Entidad"]);
 });
 
 test("administración ve sus pestañas y no las de donante/entidad", () => {
@@ -25,7 +34,7 @@ test("administración ve sus pestañas y no las de donante/entidad", () => {
 });
 
 test("con AUTH_DEV_BYPASS se ve todo", () => {
-  assert.equal(navigationFor(null, "/", { bypass: true }).length, 9);
+  assert.equal(navigationFor(null, "/", { bypass: true }).length, 10);
 });
 
 test("la misma navegación en páginas públicas y privadas (marca la activa)", () => {
