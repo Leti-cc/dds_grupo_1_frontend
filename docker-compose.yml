@@ -1,0 +1,8 @@
+services:
+  frontend:
+    build: .
+    image: frantilve/donatrack-frontend:latest
+    container_name: donatrack-frontend
+    restart: unless-stopped
+    network_mode: host      # localhost = tu máquina; escucha directo en el 3000 del host
+    env_file: .env
