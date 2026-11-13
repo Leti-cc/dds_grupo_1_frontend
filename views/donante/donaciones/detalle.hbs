@@ -1,0 +1,55 @@
+<div class="asignaciones">
+  <a class="text-link" href="{{volver}}">← Volver</a>
+  <section class="page-heading dashboard-heading">
+    <div><p class="eyebrow">Donante · Mis donaciones</p><h1>Detalle de donación</h1></div>
+    {{#if donacion}}<span class="tag {{donacion.estado.clase}}">{{donacion.estado.texto}}</span>{{/if}}
+  </section>
+
+  {{#if servicioNoDisponible}}{{> asignaciones-no-disponible url=urlReintento}}{{/if}}
+  {{#if errorCarga}}<p class="notice notice-error" role="alert">{{errorCarga}}</p>{{/if}}
+
+  {{#if donacion}}
+  <div class="detalle-donacion">
+    <section class="surface-card" aria-labelledby="datos-titulo">
+      <h2 class="visually-hidden" id="datos-titulo">Datos de la donación</h2>
+      <dl class="datos-lista">
+        <div><dt>Subcategoría</dt><dd>{{donacion.subcategoriaNombre}}</dd></div>
+        <div><dt>Descripción</dt><dd>{{donacion.descripcion}}</dd></div>
+        <div><dt>Cantidad total</dt><dd>{{donacion.cantidadTexto}}</dd></div>
+        <div><dt>Donante</dt><dd>{{donacion.donanteNombre}}</dd></div>
+      </dl>
+
+      {{#if donacion.items.length}}
+      <h3 class="panel-subtitulo">Ítems</h3>
+      <ul class="data-list items-donacion">
+        {{#each donacion.items}}
+        <li>
+          <div><strong>{{nombre}}</strong>{{#if cantidadTexto}}<small>{{cantidadTexto}}</small>{{/if}}</div>
+          <span class="muted">Vence: {{vencimientoTexto}}</span>
+        </li>
+        {{/each}}
+      </ul>
+      {{/if}}
+    </section>
+
+    <section class="surface-card timeline" aria-labelledby="linea-titulo">
+      <h2 id="linea-titulo">Seguimiento de entrega</h2>
+      {{> asignaciones-linea pasos=pasos}}
+      <p class="muted">El servicio todavía no informa la fecha de cada cambio de estado.</p>
+    </section>
+  </div>
+
+  {{#if donacion.fotos.length}}
+  <section class="surface-card" aria-labelledby="fotos-titulo">
+    <h2 id="fotos-titulo">Fotos de la entrega</h2>
+    <div class="galeria-entrega">
+      {{#each donacion.fotos}}
+      <a href="{{this}}" target="_blank" rel="noopener"><img src="{{this}}" alt="Foto de la donación recibida" loading="lazy" width="160"></a>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{/if}}
+
+</div>

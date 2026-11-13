@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { AUTH_DEV_BYPASS } from "../src/config.js";
+import { AUTH_DEV_BYPASS, PORT } from "../src/config.js";
 import { ESTADOS_ENTIDAD, leerEstado, leerId, leerPagina, urlVolverSegura } from "../src/lib/asignaciones-validacion.js";
 import {
   conParametros,
@@ -10,6 +10,11 @@ import {
   vistaPaginacion,
 } from "../src/lib/asignaciones-vista.js";
 import * as donaciones from "../src/services/asignaciones-client.js";
+import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { leerMultipart } from "../src/lib/multipart.js";
+import { MAX_BYTES_FOTO, MAX_FOTOS, TIPOS_FOTO, validarFotos, validarMotivo } from "../src/lib/recepcion-validacion.js";
+import * as logistica from "../src/services/logistica-client.js";
 
 // Montado en /entidad/donaciones con requireRole("ENTIDAD") (server.js).
 const router = Router();
@@ -150,6 +155,153 @@ router.get("/:id", async (req, res) => {
     donacion: vistaDonacion(donacion),
     pasos: pasosLinea(donacion.estado),
   });
+});
+
+// Manejo de las rutas
+
+const DIR_UPLOADS = new URL("../uploads/", import.meta.url);
+const BASE_PUBLICA = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/+$/, "");
+const LIMITE_FORMULARIO = MAX_FOTOS * MAX_BYTES_FOTO + 256 * 1024;
+
+async function prepararRecepcion(req, res, volverDelForm) {
+
+  const id = leerId(req.params.id);
+  if (!id) return { respuesta: noEncontrada(res) };
+
+  const { entidadId, conservar } = entidadActual(req);
+  const volver = urlVolverSegura(volverDelForm, PREFIJO, conParametros(`${PREFIJO}/${id}`, conservar));
+  if (!entidadId) return { respuesta: res.redirect(volver) };
+
+  const donacion = await donaciones.obtenerDonacion(req, id);
+  if (donacion?.entidadId !== entidadId) return { respuesta: noEncontrada(res) };
+  if (donacion.estado !== "EN_TRASLADO") {
+
+    req.flash({ type: "error", toast: "Esta donación ya no está en traslado." });
+    return { respuesta: res.redirect(volver) };
+
+  }
+
+  const entrega = await logistica.entregaEnTrasladoDeDonacion(req, id);
+  if (!entrega) {
+
+    req.flash({ type: "error", toast: "No encontramos la entrega en logística. Probá de nuevo en un momento." });
+    return { respuesta: res.redirect(volver) };
+
+  }
+
+  return { id, entrega, volver };
+}
+
+function falla(req, res, volver, error, porDefecto) {
+  
+  if (!error.mensajeUsuario) console.error("[donaciones-entidad] Error inesperado:", error);
+  req.flash({ type: "error", toast: error.mensajeUsuario ?? porDefecto });
+  return res.redirect(volver);
+
+}
+
+router.post("/:id/recepcion", async (req, res) => {
+  
+  const { conservar } = entidadActual(req);
+  const urlDetalle = conParametros(`${PREFIJO}/${leerId(req.params.id) ?? ""}`, conservar);
+  
+  if (Number(req.headers["content-length"] ?? 0) > LIMITE_FORMULARIO) {
+    
+    req.flash({ type: "error", toast: "Las fotos pesan demasiado. Subí hasta 3 de 5 MB cada una." });
+    return res.redirect(urlDetalle);
+
+  }
+
+  let formulario;
+  
+  try {
+    formulario = await leerMultipart(req);
+  
+  } catch {
+    
+    req.flash({ type: "error", toast: "No pudimos leer las fotos. Probá de nuevo." });
+    return res.redirect(urlDetalle);
+  }
+  let contexto;
+  try {
+    contexto = await prepararRecepcion(req, res, formulario.get("volver"));
+  
+  } catch (error) {
+    
+    return falla(req, res, URL_LISTA, error, "No se pudo cargar la donación.");
+  }
+  
+  if (contexto.respuesta) return contexto.respuesta;
+  
+  const { id, entrega, volver } = contexto;
+
+  const { fotos, error: errorFotos } = validarFotos(formulario.getAll("fotos"));
+  
+  if (errorFotos) {
+    
+    req.flash({ type: "error", toast: errorFotos });
+    return res.redirect(volver);
+  
+  }
+  
+  try {
+    
+    await mkdir(DIR_UPLOADS, { recursive: true });
+    const urls = [];
+    
+    for (const foto of fotos) {
+      
+      const nombre = `${id}-${randomUUID()}.${TIPOS_FOTO[foto.type]}`;
+      await writeFile(new URL(nombre, DIR_UPLOADS), Buffer.from(await foto.arrayBuffer()));
+      urls.push(`${BASE_PUBLICA}/uploads/${nombre}`);
+    
+    }
+    
+    await logistica.cambiarEstadoEntrega(req, entrega.id, { nuevoEstado: "ENTREGADA", fotoUrl: urls.join("|") });
+    req.flash({ type: "success", toast: "Recepción confirmada. El estado se actualiza en unos instantes." });
+    return res.redirect(volver);
+  
+  } catch (error) {
+    
+    return falla(req, res, volver, error, "No se pudo registrar la recepción.");
+  }
+
+});
+
+router.post("/:id/no-recibida", async (req, res) => {
+  
+  let contexto;
+  
+  try {
+    contexto = await prepararRecepcion(req, res, req.body?.volver);
+  
+  } catch (error) {
+  
+    return falla(req, res, URL_LISTA, error, "No se pudo cargar la donación.");
+  }
+  
+  if (contexto.respuesta) return contexto.respuesta;
+  const { entrega, volver } = contexto;
+  const { motivo, error: errorMotivo } = validarMotivo(req.body?.motivo);
+  
+  if (errorMotivo) {
+  
+    req.flash({ type: "error", toast: errorMotivo });
+    return res.redirect(volver);
+  
+  }
+  
+  try {
+    
+    await logistica.cambiarEstadoEntrega(req, entrega.id, { nuevoEstado: "NO_RECIBIDA", motivo });
+    req.flash({ type: "success", toast: "Registramos que no recibiste la donación. La administración la va a revisar." });
+    return res.redirect(volver);
+  
+  } catch (error) {
+  
+    return falla(req, res, volver, error, "No se pudo registrar la novedad.");
+  }
+  
 });
 
 export default router;

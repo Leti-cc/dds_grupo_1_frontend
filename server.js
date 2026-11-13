@@ -12,6 +12,7 @@ import adminRoutes from "./routes/admin.js";
 import asignacionesRoutes from "./routes/asignaciones.js";
 import authRoutes from "./routes/auth.js";
 import donacionesEntidadRoutes from "./routes/donaciones-entidad.js";
+import donacionesDonanteRoutes from "./routes/donaciones-donante.js";
 import donorRoutes from "./routes/donor.js";
 import entityRoutes from "./routes/entity.js";
 import ingresoRoutes from "./routes/ingreso.js";
@@ -39,6 +40,7 @@ app.disable("x-powered-by");
 
 app.use(express.static(path.join(rootDir, "public")));
 app.use("/vendor/leaflet", express.static(path.join(rootDir, "node_modules", "leaflet", "dist")));
+app.use("/uploads", express.static(path.join(rootDir, "uploads"))); // Para ver las fotos en el navegador
 app.use(express.urlencoded({ extended: false }));
 
 let sessionSecret = process.env.SESSION_SECRET;
@@ -70,6 +72,7 @@ app.use(adminRoutes);
 app.use("/admin/logistica", requireRole("ADMIN"), logisticaRoutes);
 // Flujo 3 (ingreso): va ANTES que asignaciones, cuya ruta /:id se llevaría /nueva e /importar.
 app.use("/admin/donaciones", requireRole("ADMIN"), ingresoRoutes);
+app.use("/donante/donaciones", requireRole("DONANTE"), donacionesDonanteRoutes);
 app.use("/admin/donaciones", requireRole("ADMIN"), asignacionesRoutes);
 app.use("/entidad/donaciones", requireRole("ENTIDAD"), donacionesEntidadRoutes);
 

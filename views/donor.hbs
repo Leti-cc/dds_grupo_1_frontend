@@ -12,6 +12,7 @@
 </section>
 <section class="surface-card section-block">
   <div class="section-heading"><div><p class="eyebrow">Actividad</p><h2>Mis aportes recientes</h2></div></div>
+  <a class="text-link" href="/donante/donaciones">Ver todas mis donaciones →</a>
   {{#if profile.donationHistory.length}}<ul class="data-list">{{#each profile.donationHistory}}<li><div><strong>{{subcategoria}}</strong><small>{{#each bienes}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} · {{organizacion}}</small></div><time class="muted">{{fechaIngreso}}</time></li>{{/each}}</ul>
   {{else if errors.profile}}<div class="empty-state compact">No se pudo cargar el historial de aportes.</div>
   {{else}}<div class="empty-state compact">No hay aportes para mostrar.</div>{{/if}}

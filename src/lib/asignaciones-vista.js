@@ -141,6 +141,8 @@ export function vistaDonacion(donacion, hoy = new Date()) {
     fechaIngresoTexto: fechaCorta(donacion.fechaIngreso),
     estado: vistaEstado(donacion.estado),
     enDeposito: donacion.estado === "EN_DEPOSITO",
+    enTraslado: donacion.estado === "EN_TRASLADO",
+    fotos: String(donacion.fotoEntrega ?? "").split("|").map((url) => url.trim()).filter(Boolean),
     items: items.map((item) => vistaItem(item, hoy)),
     fotoEntrega: donacion.fotoEntrega || null,
     avisoVencimiento: avisoVencimiento(items, hoy),
